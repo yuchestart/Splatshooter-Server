@@ -1,4 +1,13 @@
-var app = require("express")();
-var server = require('http').createServer(app).listen(8080);
-var io = require("socket.io").listen(server);
+'use strict';
+let http = require("http");
+let express = require("express");
 
+let app = express();
+let server = http.createServer(app);
+
+app.use(express.static(__dirname+"/client"))
+
+server.listen(8080, ()=>{
+    console.log("Server started successfully.");
+    console.log("Pow pow pow paam bow bum bum pow bam bum bum baw baw baw baw bababa bow!")
+});
