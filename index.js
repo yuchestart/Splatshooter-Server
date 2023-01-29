@@ -9,7 +9,7 @@ let server = http.createServer(app);
 let io = socketio(server);
 
 io.on("connection",(sock)=>{
-    sock.emit("msg","Emotional damage")
+    sock.emit("notify","Hooray! You actually connected!")
 })
 
 app.use(express.static(__dirname+"/client"))
