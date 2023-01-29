@@ -1,3 +1,7 @@
+<!--
+    Misc. Information:
+    Developed and stored on What-ever-this-is's computer and the Octocat networks.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,18 +9,33 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./resource/css/styles.css">
+    <link rel="stylesheet" href="./resource/css/notifier.css">
     <script src="./resource/js/main.js"></script>
     <script src="./resource/js/render/render2d.js"></script>
+    <script src="./resource/js/network/connection.js"></script>
+    <script src="./resource/js/ui/htmlgui.js"></script>
     <script src="/socket.io/socket.io.js"></script><!--Yes Aiden, I know. I know this file doesn't exist, but we really need it.-->
     <title>Splatshooter</title>
 </head>
 <body>
-    <div id='renderingContainer'>
-        <canvas id="render3d"></canvas>
-        <canvas id="render2d"></canvas>
+    <div class='renderingContainer'>
+        <canvas class="render3d"></canvas>
+        <canvas class="render2d"></canvas>
     </div>
-    <div id="gui">
-        
+    <div class="gui">
+        <div class="notifiercontainer">
+            <div class="notifierbox">
+                <h1 class="title">Ayo that's kinda sus</h1>
+                <pre class="info">Wow you found me, STALKER.</pre>
+                <div class="othercontent">
+                    <button>EMOTIONAL DAMAGE</button>
+                </div>
+                <div class="actions">
+                    <button class="action">OK</button>
+                    <button class="denied">eh,nevermind.</button>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
