@@ -1,5 +1,6 @@
 //ALERT: DO NOT TOUCH!
 'use strict';
+//DANG IT! I forgot to add the API implementation, but socket.io is good enough.
 let http = require("http");
 let express = require("express");
 let socketio = require("socket.io");
