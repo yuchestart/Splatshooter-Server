@@ -1,0 +1,3 @@
+Okay, so the layer of graphical elements represents how the elements of the
+gui layer on top of eachother to make an immersive experience.
+Very crude representation shows how the downloadable client version cannot be blocked.
