@@ -1,21 +1,32 @@
-//ALERT: DO NOT TOUCH!
-'use strict';
-//DANG IT! I forgot to add the API implementation, but socket.io is good enough.
-let http = require("http");
-let express = require("express");
-let socketio = require("socket.io");
 
-let app = express();
-let server = http.createServer(app);
-let io = socketio(server);
+import { WebSocketServer } from 'ws'; // Import WebSocketServer
 
-io.on("connection",(sock)=>{
-    sock.emit("notify","Hooray! You actually connected!")
-})
-
-app.use(express.static(__dirname+"/client"))
-
-server.listen(8080, ()=>{
-    console.log("Server started successfully.");
-    console.log("Che Yu was here. hahahaha");
-});
+const wss = new WebSocketServer({port: 8080}); // Create new WebSocketServer
+const websockets = {};
+/**
+ * 
+ * @param {WebSocket} websocket 
+ */
+function websocketConnected(websocket){
+    websocket.id=websockets.length;
+    websockets[websocket.id] = websocket;
+    websocket.on('message',websocketRecievedMessage)
+    websocket.on('close',websocketClose)
+}
+/**
+ * 
+ * @param {String} message 
+ */
+function websocketRecievedMessage(message){
+    message = JSON.parse(message)
+    switch(message.type){
+        case "message":
+            console.log(`New message from WebSocket #${this.id}`)
+            console.log(message.data);
+            break;
+    }
+}
+function websocketClose(){
+    websockets[this.id] = undefined;
+}
+wss.on('connection',websocketConnected)

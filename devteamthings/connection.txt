@@ -1,0 +1,8 @@
+MESSAGES SENT BETWEEN SPLATSHOOTER AND THE CLIENT ARE IN THIS FORMAT:
+{
+    "type":"message" // It specifies what kind of message is sent
+    "data":"Oh hi" // Specifies the data in the message
+    "timestamp":"00:54 on Thursday, Jan 1 1970" //*OPTIONAL* What time the message was sent
+}
+With the new WebSocket code, you can access websockets from anywhere.
+This means we can make Splatshooter unblockable.
