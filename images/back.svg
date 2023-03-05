@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+    <circle cx='250'  cy="250" r="225" fill="none" stroke="gray" stroke-width="50px"/>
+    <g style="transform-origin:250px 250px;transform:scale(125%)">
+    <path d="M350 250 L150 250 M150 250 L200 200 M150 250 L200 300" stroke="gray" fill="none" stroke-width="50px" stroke-linecap="round"/>
+    </g>
+</svg>
