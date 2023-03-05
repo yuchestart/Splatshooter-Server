@@ -1,4 +1,4 @@
-# Meet our dev team!
+# [ <img src='./images/back.svg' width='30' height='30'/> ](https://github.com/What-ever-this-is/Splatshooter) Meet our dev team!
 
 ## "Mission Control"
 
