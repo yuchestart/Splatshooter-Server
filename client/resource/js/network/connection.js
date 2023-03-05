@@ -4,8 +4,14 @@ const CONNECTION = {
         return JSON.stringify({
             type:type,
             data:data,
-            timestamp:new Date()
+            timestamp:new Date().toString(0)
         })
+    },
+    parseMessage:function(message){
+        switch(message.type){
+            case "notification":
+                
+        }
     }
 }
 
@@ -14,5 +20,5 @@ CONNECTION.socket.addEventListener('open',(e)=>{
     CONNECTION.socket.send(CONNECTION.newMessage("message","Hi server!"))
 })
 CONNECTION.socket.addEventListener('message',(e)=>{
-    CONNECTION.console.log('I heard this: ',e.data);
+    
 })
