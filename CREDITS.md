@@ -22,6 +22,8 @@ Irvin Ju - Future Tester
 
 William Halbritter Rodriguez - Future Tester
 
+Jack Galle - Future Tester
+
 ## Music
 
 Irvin Ju - Composer
