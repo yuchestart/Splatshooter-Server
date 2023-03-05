@@ -1,6 +1,6 @@
 # Splatshooter
 
-My friend [William](#Dev-team) just wanted to make a game similar to Splatoon 3.
+My friend [William](./CREDITS.md#mission-control) just wanted to make a game similar to Splatoon 3.
 <hr>
 From the dev team at South Middle School.
 
