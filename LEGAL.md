@@ -1,5 +1,5 @@
 # Legal information
-[ <img src='./images/back.svg' width='30' height='30'/> ](./README.md)
+[ <img src='./images/back.svg' width='30' height='30'/> ](https://github.com/What-ever-this-is/Splatshooter)
 ## Terms
 "SOFTWARE" refers to any of the source code, and the actual application.
 
