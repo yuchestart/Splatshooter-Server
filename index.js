@@ -1,31 +1,24 @@
 
-import { WebSocketServer } from 'ws'; // Import WebSocketServer
-import { Message } from "./server/messages"
-
+//Import modules, such as WebSocketServer and Message
+import { WebSocketServer } from 'ws';
+import { Message } from "./server/messages";
+//Initialize variables
 const wss = new WebSocketServer({port: 8080}); // Create new WebSocketServer
-
 const websockets = {};
-/**
- * 
- * @param {WebSocket} websocket 
- */
+
 function websocketConnected(websocket){
     var id=websockets.length;
     websockets[id] = websocket;
-    websocket.send(new Message("notification","You have successfully connected to Splatshooter Servers."))
+    websocket.send(new Message("info","SPLATSHOOTER_CONNECTION_SUCCESSFUL"))
     websocket.on('message',
         function(msg){
             websocketRecievedMessage(websockets[websocket.id],msg)
         }
-    )
+    );
     websocket.on('close',function(){
         websocketClose(websockets[websocket.id])
-    })
+    });
 }
-/**
- * 
- * @param {String} message 
- */
 function websocketRecievedMessage(ws,message){
     message = JSON.parse(message)
     switch(message.type){
