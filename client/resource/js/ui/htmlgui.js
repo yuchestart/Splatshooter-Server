@@ -8,6 +8,6 @@ function $(name,parent){
         id:document.getElementById(name)
     }
 }
-function notify(){
+function alert(){
     
 }

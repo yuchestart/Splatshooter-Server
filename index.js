@@ -29,7 +29,6 @@ function websocketRecievedMessage(ws,message){
     }
 }
 function websocketClose(ws){
-
     websockets[ws.id] = undefined;
 }
 wss.on('connection',websocketConnected)

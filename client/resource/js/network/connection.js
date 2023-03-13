@@ -7,9 +7,15 @@ const CONNECTION = {
             timestamp:new Date().toString(0)
         })
     },
+    /**
+     * 
+     * @param {Message} message 
+     */
     parseMessage:function(message){
         switch(message.type){
-            case "notification":
+            case "info":
+                console.log(message.data)
+            case "matchjoin":
                 
         }
     }

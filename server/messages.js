@@ -8,6 +8,8 @@ class Message{
     }
 }
 class Transform{
-    
+    constructor(){
+        
+    }
 }
 export {Message}
