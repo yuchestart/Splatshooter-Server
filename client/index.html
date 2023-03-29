@@ -14,10 +14,15 @@
     <script src="./resource/js/main.js"></script>
     <script src="./resource/js/network/connection.js"></script>
     <script src="./resource/js/ui/htmlgui.js"></script>
-    
+    <link rel="manifest" href="manifest.json">
     <title>Splatshooter</title>
 </head>
 <body>
+    <script>navigator.serviceWorker &&
+        navigator.serviceWorker.register('sw.js').then(function (registration)
+        {
+        });
+    </script>
     <div class='renderingContainer'>
         <canvas class="render3d"></canvas>
         <canvas class="render2d"></canvas>
