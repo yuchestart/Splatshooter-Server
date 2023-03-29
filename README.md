@@ -10,5 +10,5 @@ This is just a recreation of Splatoon 3 designed to run in the browser so you ca
 No, we did not abandon the project. We aren't able to do anything at the moment cuz I'm busy and CATS is not finished yet.
 # Aiden Here
 How are you
-
-<a name='why'>1</a>: Why would I ever tell you?
+# why
+Why would I ever tell you?
