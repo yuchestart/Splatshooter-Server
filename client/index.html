@@ -1,6 +1,6 @@
 <!--
     Misc. Information:
-    Developed and stored on What-ever-this-is's computer and the Octocat networks.
+    Developed and stored on What-ever-this-is(yuchestart)'s computer and the Octocat networks.
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./resource/css/styles.css">
     <link rel="stylesheet" href="./resource/css/alert.css">
-    <script src="./resource/js/network/messages.js"></script>
+    <link rel="stylesheet" href="./resource/css/loadmodal.css">
     <script src="./resource/js/main.js"></script>
     <script src="./resource/js/network/connection.js"></script>
     <script src="./resource/js/ui/htmlgui.js"></script>
@@ -18,16 +18,16 @@
     <title>Splatshooter</title>
 </head>
 <body>
-    <script>navigator.serviceWorker &&
+    <script type="text/javascript">navigator.serviceWorker &&
         navigator.serviceWorker.register('sw.js').then(function (registration)
         {
         });
     </script>
-    <div class='renderingContainer'>
+    <div class='renderingcontainer'>
         <canvas class="render3d"></canvas>
         <canvas class="render2d"></canvas>
     </div>
-    <div class="gui">
+    <div class="gui" hidden>
         <div class="alertcontainer">
             <div class="alertbox">
                 <h1 class="title">UNDER CONSTRUCTION</h1>
@@ -41,6 +41,9 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="loadmodal">
+        <img src="./resource/img/loadwheel.svg" class="loadmodalwheel">
     </div>
 </body>
 </html>

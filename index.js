@@ -1,7 +1,7 @@
 
 //Import modules, such as WebSocketServer and Message
 import { WebSocketServer } from 'ws';
-import { Message } from "./server/messages";
+import { Message } from "./server/messages.js";
 //Initialize variables
 const wss = new WebSocketServer({port: 8080}); // Create new WebSocketServer
 const websockets = {};

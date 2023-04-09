@@ -1,0 +1,5 @@
+.loadmodal{
+    -webkit-backdrop-filter:blur(30px);
+    backdrop-filter:blur(30px);
+    background-color:rgba(0,0,0,0.5);
+}

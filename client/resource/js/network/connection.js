@@ -16,12 +16,12 @@ const CONNECTION = {
             case "info":
                 console.log(message.data)
             case "matchjoin":
-                
+                break;
         }
     }
 }
 
-CONNECTION.socket = new WebSocket(`ws://${PARAMETERS.HOST_ON_LOCAL_SERVER?PARAMETERS.LOCAL_URL:PARAMETERS.DEPLOYMENT_URL}`)
+CONNECTION.socket = new WebSocket(`ws://${CONFIG.HOST_ON_LOCAL_SERVER?CONFIG.LOCAL_URL:CONFIG.DEPLOYMENT_URL}`)
 CONNECTION.socket.addEventListener('open',(e)=>{
     CONNECTION.socket.send(CONNECTION.newMessage("message","Hi server!"))
 })
