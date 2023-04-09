@@ -5,6 +5,8 @@ import { Message } from "./server/messages.js";
 //Initialize variables
 const wss = new WebSocketServer({port: 8080}); // Create new WebSocketServer
 const websockets = {};
+const express = require("express")
+
 
 function websocketConnected(websocket){
     var id=websockets.length;
