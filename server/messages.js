@@ -12,4 +12,4 @@ class Transform{
         
     }
 }
-export {Message}
+module.exports = {Message,Transform}

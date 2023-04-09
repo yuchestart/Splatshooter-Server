@@ -21,7 +21,7 @@ const CONNECTION = {
     }
 }
 
-CONNECTION.socket = new WebSocket(`ws://${CONFIG.HOST_ON_LOCAL_SERVER?CONFIG.LOCAL_URL:CONFIG.DEPLOYMENT_URL}`)
+CONNECTION.socket = new WebSocket("ws://localhost:8080")
 CONNECTION.socket.addEventListener('open',(e)=>{
     CONNECTION.socket.send(CONNECTION.newMessage("message","Hi server!"))
 })
