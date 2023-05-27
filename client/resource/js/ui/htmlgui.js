@@ -8,6 +8,6 @@ function $(name,parent){
         id:document.getElementById(name)
     }
 }
-function alert(){
-    
+function loadModalHide(){
+    $("loadmodal").class[0].style.animationPlayState="running"
 }

@@ -4,41 +4,41 @@
 //import * as http from "http"
 //import express from "express"
 
+console.log("----SPLATSHOOTER INTERNAL SERVERS----")
+console.log("Loading...")
 const ws = require("ws");
 const messages = require("./server/messages.js");
 const http = require("http");
 const express = require("express");
 //Setup WSS and express
 const wss = new ws.WebSocketServer({port: 8080});
-const websockets = {};
+let websockets = [];
 const app = express()
 const server = http.createServer(app)
 app.use(express.static(__dirname + "/client"))
-server.listen(8000, ()=>console.log("HTTP Listening on port 8000"))
+console.log("Done.")
+server.listen(8000, ()=>console.log("HTTP listening on port 8000"))
+console.log("WebSocket listening on port 8080")
 //Setup WebSocket
-function websocketConnected(websocket){
-    var id=websockets.length;
-    websockets[id] = websocket;
-    websocket.send(new messages.Message("info","Hello World!"))
-    websocket.on('message',
-        function(msg){
-            websocketRecievedMessage(websockets[websocket.id],msg)
-        }
-    );
-    websocket.on('close',function(){
-        websocketClose(websockets[websocket.id])
-    });
+function websocketConnected(ws){
+    ws.on('message',recievedMessage)
+    ws.on('close',()=>{webSocketClose(ws)})
+    websockets.push(ws)
+    ws.id = websockets.length-1
 }
-function websocketRecievedMessage(ws,message){
+function recievedMessage(message){
     message = JSON.parse(message)
     switch(message.type){
-        case "message":
-            console.log(`New message from WebSocket #${ws.id}`)
-            console.log(message.data);
+        case "handshake":
+            this.send(messages.Message(
+                "handshake",
+                websockets.length-1
+            ))
             break;
     }
 }
-function websocketClose(ws){
-    websockets[ws.id] = undefined;
+function webSocketClose(ws){
+    console.log(`Connection with socket #${ws.id} has been terminated.`)
+    websockets = websockets.filter(s => s!== ws)
 }
 wss.on('connection',websocketConnected)
