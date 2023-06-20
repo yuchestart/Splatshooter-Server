@@ -16,6 +16,8 @@ Che Yu - Head Developer
 
 Aiden Coogan - Developer
 
+Austin Harderson - Developer
+
 ## "Test Pilots"
 
 Irvin Ju - Future Tester
