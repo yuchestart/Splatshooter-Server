@@ -14,12 +14,12 @@ class Vector3{
         this.z+=v.z;
     }
     normalize(){
-        var len = Math.sqrt(this.x**2,this.y**2,this.z**2)
+        var len = Math.sqrt(this.x**2+this.y**2+this.z**2)
         this.x = this.x/len;
         this.y = this.y/len;
         this.z = this.z/len;
     }
 }
 class Transform{
-
+    constructor(x,y,w,l,h)
 }
