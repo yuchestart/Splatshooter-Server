@@ -11,7 +11,7 @@
     "url": "git+https://github.com/What-ever-this-is/Splatshooter.git"
   },
   "author": "Splatshooter Dev Team",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/What-ever-this-is/Splatshooter/issues"
   },
