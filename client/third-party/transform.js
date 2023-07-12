@@ -72,6 +72,6 @@ class Transform{
         var withinx = xpos1[0] < xpos2[1] & xpos1[2] > xpos2[0];
         var withiny = ypos1[0] < ypos2[1] & ypos1[2] > ypos2[0];
         var withinz = zpos1[0] < zpos2[1] & zpos1[2] > zpos2[0];
-        return withinx && withiny && withinz
+        return withinx && withiny && withinz;
     }
 }
