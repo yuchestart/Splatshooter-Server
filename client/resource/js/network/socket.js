@@ -5,6 +5,7 @@ const CONNECTION = {
         return JSON.stringify({
             type:type,
             data:data,
+            senderId:this.id,
             timestamp:new Date().toString(0)
         })
     },
@@ -18,6 +19,7 @@ const CONNECTION = {
                 console.log("Handshake completed successfully.")
                 this.id = message.data;
                 loadModalHide()
+                gameMain()
         }
     }
 }
@@ -25,7 +27,6 @@ const CONNECTION = {
 CONNECTION.socket = new WebSocket("ws://localhost:8080")
 CONNECTION.socket.addEventListener('open',(e)=>{
     CONNECTION.socket.send(CONNECTION.newMessage("handshake","Handshake start"))
-    console.log("WebSocket Handshake started")
 })
 CONNECTION.socket.addEventListener('message',(e)=>{
     CONNECTION.parseMessage(JSON.parse(e.data))

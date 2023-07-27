@@ -13,6 +13,7 @@ const express = require("express");
 //Setup WSS and express
 const wss = new ws.WebSocketServer({port: 8080});
 let websockets = [];
+const matches = {};
 const app = express()
 const server = http.createServer(app)
 app.use(express.static(__dirname + "/client"))
@@ -34,6 +35,11 @@ function recievedMessage(message){
                 "handshake",
                 websockets.length-1
             ))
+            break;
+        case "joinrequest":
+            console.log(`Join request recieved for ${message.senderId}`)
+            console.log(`Match requested: ${message.data.matchtype}`)
+            console.log(`Match ID Requested: ${message.data.matchid}`)
             break;
     }
 }
