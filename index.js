@@ -41,6 +41,8 @@ function recievedMessage(message){
             console.log(`Match requested: ${message.data.matchtype}`)
             console.log(`Match ID Requested: ${message.data.matchid}`)
             break;
+        case "matchtransformrequest":
+            break;
     }
 }
 function webSocketClose(ws){
