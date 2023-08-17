@@ -4,15 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Base</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
+    <style>
+        body {
+            background-color: #111;
+        }
+    </style>
 </head>
 <body>
+    <textarea id="socketdata"></textarea>
+    <button id="sentbutton" onclick="socket.send(pako.deflate(document.getElementById('socketdata').value))">Send Socket Message</button>
     <script>
         let socket = new WebSocket("ws://localhost:6479");
         socket.addEventListener("open", (event) => {
             socket.send("Connected to socket.");
         });
+        const button = document.getElementById("sentbutton");
+    
+        // Define a function to be executed when the button is clicked
+        function handleClick() {
+            const textdata = document.getElementById('socketdata').value;
+            const packed = pako.deflate(textdata, { to: 'string' });
+            console.log(packed);
+            socket.send(packed)
+        }
+        
+        // Attach the click event handler to the button
+        button.addEventListener("click", handleClick);
     </script>
-    <textarea id="socketdata"></textarea>
-    <button onclick="socket.send(document.getElementById('socketdata').value)">Send Socket Message</button>
 </body>
 </html>

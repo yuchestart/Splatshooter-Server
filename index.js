@@ -2,6 +2,7 @@ const https = require("https");
 const http = require("http");
 const ws = require("ws");
 const fs = require("fs");
+const pako = require('pako');
 const messages = require("./src/messages.js");
 const version = require('./package.json').version;
 const config = require('./config.json');
@@ -35,10 +36,26 @@ server.listen(config.port, (req, res) => {
         ws.on('error', console.error);
         
         ws.on('message', (msg) => {
-            console.log(msg.toString());
+            if (isCompressed(msg)) {
+                console.log("Recieved Message! Compressed data: " + msg)
+                const uncompressed = pako.inflate(msg, { to: 'string' });
+                console.log("Uncompressed data:" + uncompressed);
+            } else {
+                console.log("Recieved Message! Uncompressed data: " + msg)
+            }
         });
     });
 })
+
+function isCompressed(data) {
+    try {
+        pako.inflate(data);
+        return true;
+    } catch (error) {
+        console.warn("warning: uncompressed data caught!")
+        return false;
+    }
+  }
 
 console.log("Server listening on port " + config.port)
 
