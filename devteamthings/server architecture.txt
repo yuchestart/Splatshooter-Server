@@ -1,0 +1,6 @@
+WHEN PLAYER JOINS GAME:
+sends notice to server that they joined game
+server creates new server player entity
+player is assigned to team
+server sends notice to all other players to create clientplayerentity
+scoreboard is updated to add player across all clients (scoreboard is tracked on server)
