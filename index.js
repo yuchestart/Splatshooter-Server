@@ -12,6 +12,7 @@ console.log("Loading...");
 
 let server;
 
+console.log("creating http server...");
 // setup http server
 if (config.secure) {
     server = https.createServer({
@@ -21,7 +22,7 @@ if (config.secure) {
 } else {
     server = http.createServer();
 }
-
+console.log("creating websocket server...");
 // Setup WSS
 const serverSocket = new ws.WebSocketServer({ server });
 

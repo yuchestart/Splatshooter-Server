@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/What-ever-this-is/Splatshooter#readme",
   "dependencies": {
+    "pako": "^2.1.0",
     "ws": "^8.13.0"
   }
 }
