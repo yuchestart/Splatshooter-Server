@@ -28,10 +28,20 @@ const serverSocket = new ws.WebSocketServer({ server });
 let websockets = [];
 
 const matches = {};
+
+server.listen(config.port, (req, res) => {
+    serverSocket.on('connection', (ws) => {
+        ws.on('error', console.error);
+        
+        ws.on('message', (msg) => {
+            console.log(msg.toString());
+        });
+    });
+})
+
+console.log("Server listening on port " + config.port)
+
 console.log("Done.")
-console.log("WebSocket listening on port " + wss.port)
-
-
 // Setup WebSocket
 function websocketConnected(ws){
     ws.on('message',recievedMessage)
@@ -62,7 +72,3 @@ function webSocketClose(ws){
     console.log(`Connection with socket #${ws.id} has been terminated.`)
     websockets = websockets.filter(s => s!== ws)
 }
-
-server.listen(config.port, (req, res) => {
-    
-})
