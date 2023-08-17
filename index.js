@@ -1,32 +1,45 @@
-//Import modules, such as WebSocketServer and Message
-//import { WebSocketServer } from 'ws';
-//import { Message } from "./server/messages.js";
-//import * as http from "http"
-//import express from "express"
-
-console.log("----SPLATSHOOTER INTERNAL SERVERS----")
-console.log("Loading...")
-const ws = require("ws");
-const messages = require("./server/messages.js");
+const https = require("https");
 const http = require("http");
-const express = require("express");
-//Setup WSS and express
-const wss = new ws.WebSocketServer({port: 8080});
+const ws = require("ws");
+const fs = require("fs");
+const messages = require("./src/messages.js");
+const version = require('./package.json').version;
+const config = require('./config.json');
+
+// INIT
+console.log("Splatshooter server - v" + version);
+console.log("Loading...");
+
+let server;
+
+// setup http server
+if (config.secure) {
+    server = https.createServer({
+        cert: fs.readFileSync('./cert/certificate.pem'),
+        key: fs.readFileSync('./cert/key.pem')
+    });
+} else {
+    server = http.createServer();
+}
+
+// Setup WSS
+const serverSocket = new ws.WebSocketServer({ server });
+
 let websockets = [];
+
 const matches = {};
-const app = express()
-const server = http.createServer(app)
-app.use(express.static(__dirname + "/client"))
 console.log("Done.")
-server.listen(8000, ()=>console.log("HTTP listening on port 8000"))
-console.log("WebSocket listening on port 8080")
-//Setup WebSocket
+console.log("WebSocket listening on port " + wss.port)
+
+
+// Setup WebSocket
 function websocketConnected(ws){
     ws.on('message',recievedMessage)
     ws.on('close',()=>{webSocketClose(ws)})
     websockets.push(ws)
     ws.id = websockets.length-1
 }
+
 function recievedMessage(message){
     message = JSON.parse(message)
     switch(message.type){
@@ -49,4 +62,7 @@ function webSocketClose(ws){
     console.log(`Connection with socket #${ws.id} has been terminated.`)
     websockets = websockets.filter(s => s!== ws)
 }
-wss.on('connection',websocketConnected)
+
+server.listen(config.port, (req, res) => {
+    
+})
