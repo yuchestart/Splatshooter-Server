@@ -25,7 +25,6 @@
         function handleClick() {
             const textdata = document.getElementById('socketdata').value;
             const packed = pako.deflate(textdata, { to: 'string' });
-            console.log(packed);
             socket.send(packed)
         }
         
