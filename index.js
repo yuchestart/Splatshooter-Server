@@ -1,12 +1,10 @@
 const https = require("https");
 const http = require("http");
-import WebSocketServer from "ws"
+const { WebSocketServer } = require("ws");
 const fs = require("fs");
 const pako = require('pako');
-const messages = require("./src/messages.js");
 const version = require('./package.json').version;
 const config = require('./config.json');
-const handler = require('./src/network/servernetworkinghandler.js')
 
 // INIT
 console.log("Splatshooter server - v" + version);
@@ -34,9 +32,8 @@ server.listen(config.port, (req, res) => {
         
         ws.on('message', (msg) => {
             if (isCompressed(msg, true)) {
-                console.log("Recieved Message! Compressed data: " + msg)
                 const uncompressed = pako.inflate(msg, { to: 'string' });
-                console.log("Uncompressed data:" + uncompressed);
+                console.log("Recieved message: " + uncompressed);
             }
         });
     });

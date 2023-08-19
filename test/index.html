@@ -13,8 +13,10 @@
 </head>
 <body>
     <textarea id="socketdata"></textarea>
-    <button id="sentbutton" onclick="socket.send(pako.deflate(document.getElementById('socketdata').value))">Send Socket Message</button>
-    <script>
+    <button id="sentbutton">Send Socket Message</button>
+    <script type="module">
+        import  Message  from "./Message.js"
+
         let socket = new WebSocket("ws://localhost:6479");
         socket.addEventListener("open", (event) => {
             socket.send("Connected to socket.");
@@ -24,12 +26,11 @@
         // Define a function to be executed when the button is clicked
         function handleClick() {
             const textdata = document.getElementById('socketdata').value;
-            const packed = pako.deflate(textdata, { to: 'string' });
+            const testMessage = new Message(textdata, "string");
+            const packed = pako.deflate(JSON.stringify(testMessage), { to: 'string' });
             socket.send(packed)
         }
-        
-        // Attach the click event handler to the button
-        button.addEventListener("click", handleClick);
+        button.onclick = handleClick;
     </script>
 </body>
 </html>

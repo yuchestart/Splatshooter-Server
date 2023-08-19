@@ -24,7 +24,7 @@ const CONNECTION = {
     }
 }
 
-CONNECTION.socket = new WebSocket("ws://localhost:8080")
+CONNECTION.socket = new WebSocket("ws://localhost:6479")
 CONNECTION.socket.addEventListener('open',(e)=>{
     CONNECTION.socket.send(CONNECTION.newMessage("handshake","Handshake start"))
 })
