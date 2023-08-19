@@ -1,11 +1,12 @@
 const https = require("https");
 const http = require("http");
-const ws = require("ws");
+import WebSocketServer from "ws"
 const fs = require("fs");
 const pako = require('pako');
 const messages = require("./src/messages.js");
 const version = require('./package.json').version;
 const config = require('./config.json');
+const handler = require('./src/network/servernetworkinghandler.js')
 
 // INIT
 console.log("Splatshooter server - v" + version);
@@ -25,7 +26,7 @@ if (config.secure) {
 }
 console.log("creating websocket server...");
 // Setup WSS
-const serverSocket = new ws.WebSocketServer({ server });
+const serverSocket = new WebSocketServer({ server });
 
 server.listen(config.port, (req, res) => {
     serverSocket.on('connection', (ws) => {
