@@ -1,6 +1,5 @@
-import { WebSocketServer } from "ws";
-
-export { ServerHandshakeHandler };
+const pako = require("pako")
+const { WebSocketServer } = require("ws");
 
 class ServerHandshakeHandler {
 
@@ -15,6 +14,12 @@ class ServerHandshakeHandler {
 
     onHandshake(handshakeData)
     {
-        
+        if (handshakeData.intent == "query") {
+            const handshake = new Message({ type: 'handshake', intent: 'confirm' }, "json");
+            const compressed = pako.deflate(JSON.stringify(handshake), { to: 'string' });
+            this.socket.send(compressed);
+        }
     }
 }
+
+module.exports = { ServerHandshakeHandler }

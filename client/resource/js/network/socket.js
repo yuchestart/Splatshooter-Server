@@ -33,8 +33,11 @@ const CONNECTION = {
 
 export function INIT_CONNECTION() {
     CONNECTION.socket = new WebSocket("ws://localhost:6479");
+    CONNECTION.socket.onclose = (event) => {
+        console.log(event);
+      };
     CONNECTION.socket.addEventListener('open',(e)=>{
-        const handshake = new Message({ type: 'handshake', data: { intent: 'client' } }, "json"); // intent doesn't do anything (yet) but it's better than "Handshake start"
+        const handshake = new Message({ type: 'handshake', intent: 'query' }, "json"); // intent doesn't do anything (yet) but it's better than "Handshake start"
         const compressed = pako.deflate(JSON.stringify(handshake), { to: 'string' });
         CONNECTION.socket.send(compressed);
     })

@@ -6,6 +6,7 @@ const pako = require('pako');
 const version = require('./package.json').version;
 const config = require('./config.json');
 const { Message } = require('./src/network/messages/Message.js')
+const { ServerHandshakeHandler } = require("./src/network/ServerHandshakeHandler.js");
 
 // INIT
 console.log("Splatshooter server - v" + version);
@@ -37,12 +38,9 @@ server.listen(config.port, (req, res) => {
                 
                 switch (uncompressed.dataType) {
                     case "json":
-                        console.log("Uncropmessed data " + uncompressed.data)
                         if (uncompressed.data.type == "handshake") {
-                            // send handshake back
-                            const handshake = new Message({ type: 'handshake', data: { intent: 'client' } }, "json");
-                            const compressed = pako.deflate(JSON.stringify(handshake), { to: 'string' });
-                            ws.send(compressed);
+                            const handler = new ServerHandshakeHandler(ws);
+                            handler.onHandshake(uncompressed.data);
                         }
                         break;
                 
