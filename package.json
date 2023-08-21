@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test_server": "node index.js",
-    "test_client": "cd test && npx http-server --cors"
+    "test_client": "cd client && npx http-server --cors"
   },
   "repository": {
     "type": "git",

@@ -1,3 +1,6 @@
+import { gameMain } from "../main.js";
+import * as Message from "./Message.js"
+
 const CONNECTION = {
     socket:undefined,
     id:undefined,
@@ -6,7 +9,7 @@ const CONNECTION = {
             type:type,
             data:data,
             senderId:this.id,
-            timestamp:new Date().toString(0)
+            timestamp: null // for debugging purposes, change later...
         })
     },
     parseMessage:function(message){
@@ -26,7 +29,9 @@ const CONNECTION = {
 
 CONNECTION.socket = new WebSocket("ws://localhost:6479")
 CONNECTION.socket.addEventListener('open',(e)=>{
-    CONNECTION.socket.send(CONNECTION.newMessage("handshake","Handshake start"))
+    const handshake = new Message(CONNECTION.newMessage('handshake', { intent: 'load' }), "json"); // intent doesn't do anything (yet) but it's better than "Handshake start"
+    const compressed = pako.deflate(JSON.stringify(handshake), { to: 'string' })
+    CONNECTION.socket.send(compressed)
 })
 CONNECTION.socket.addEventListener('message',(e)=>{
     CONNECTION.parseMessage(JSON.parse(e.data))

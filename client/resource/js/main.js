@@ -1,3 +1,5 @@
+import { INIT_GAME } from "./render/Initialize.js"
+
 let CONFIG;
 //We start rolling first
 function main(){
@@ -11,11 +13,12 @@ function main(){
   
 }
 //After handshake complete, we start rolling
-function gameMain(){
+export function gameMain(){
   var request = CONNECTION.newMessage("joinrequest",{
     matchtype:"insane",
     matchid:"random"
   })
   CONNECTION.socket.send(request)
+  INIT_GAME();
 }
 window.onload = main;

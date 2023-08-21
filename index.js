@@ -34,6 +34,18 @@ server.listen(config.port, (req, res) => {
             if (isCompressed(msg, true)) {
                 const uncompressed = pako.inflate(msg, { to: 'string' });
                 console.log("Recieved message: " + uncompressed);
+                switch (uncompressed.dataType) {
+                    case "json":
+                        const jsonData = JSON.parse(uncompressed)
+                        const fullData = JSON.parse(jsonData.data)
+                        if (fullData.type === "handshake") {
+                            ws.send();
+                        }
+                        break;
+                
+                    default:
+                        break;
+                }
             }
         });
     });

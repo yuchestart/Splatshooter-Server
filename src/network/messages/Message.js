@@ -11,8 +11,4 @@ class Message {
         this.dataType = type;
     }
 
-    asJSON() {
-        return { data: this.data, dataType: this.dataType }
-    }
-
 }

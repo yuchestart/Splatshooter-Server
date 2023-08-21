@@ -8,7 +8,7 @@ function $(name,parent){
         id:document.getElementById(name)
     }
 }
-function loadModalHide(){
+export function loadModalHide() {
     $("loadmodal").class[0].style.animationPlayState="running"
     $('gui').class[0].hidden = false;
     $('beforegame').class[0].hidden = false;
