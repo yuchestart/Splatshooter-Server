@@ -4,6 +4,7 @@
     position:absolute;
     top:0px;
     left:0px;
+    margin: 0px;
 }
 #render3d,#render2d{
     width:inherit;
@@ -11,6 +12,12 @@
     position:inherit;
     top:inherit;
     left:inherit;
+}
+.hidden {
+    position: absolute;
+    top: -3px;
+    right: -.625rem;
+    display: none !important;
 }
 *{
     font-family:sans-serif;

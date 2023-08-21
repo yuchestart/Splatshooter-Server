@@ -1,5 +1,3 @@
-export { Message }
-
 class Message {
 
     /**
@@ -12,3 +10,5 @@ class Message {
     }
 
 }
+
+module.exports = { Message }

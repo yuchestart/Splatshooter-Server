@@ -5,6 +5,7 @@ const fs = require("fs");
 const pako = require('pako');
 const version = require('./package.json').version;
 const config = require('./config.json');
+const { Message } = require('./src/network/messages/Message.js')
 
 // INIT
 console.log("Splatshooter server - v" + version);
@@ -32,14 +33,16 @@ server.listen(config.port, (req, res) => {
         
         ws.on('message', (msg) => {
             if (isCompressed(msg, true)) {
-                const uncompressed = pako.inflate(msg, { to: 'string' });
-                console.log("Recieved message: " + uncompressed);
+                const uncompressed = JSON.parse(pako.inflate(msg, { to: 'string' }));
+                
                 switch (uncompressed.dataType) {
                     case "json":
-                        const jsonData = JSON.parse(uncompressed)
-                        const fullData = JSON.parse(jsonData.data)
-                        if (fullData.type === "handshake") {
-                            ws.send();
+                        console.log("Uncropmessed data " + uncompressed.data)
+                        if (uncompressed.data.type == "handshake") {
+                            // send handshake back
+                            const handshake = new Message({ type: 'handshake', data: { intent: 'client' } }, "json");
+                            const compressed = pako.deflate(JSON.stringify(handshake), { to: 'string' });
+                            ws.send(compressed);
                         }
                         break;
                 

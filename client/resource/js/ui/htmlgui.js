@@ -10,6 +10,6 @@ function $(name,parent){
 }
 export function loadModalHide() {
     $("loadmodal").class[0].style.animationPlayState="running"
-    $('gui').class[0].hidden = false;
+    $('gui').class[0].classList.toggle("hidden");
     $('beforegame').class[0].hidden = false;
 }

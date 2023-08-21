@@ -1,5 +1,6 @@
 import { gameMain } from "../main.js";
-import * as Message from "./Message.js"
+import { loadModalHide } from "../ui/htmlgui.js";
+import Message from "./Message.js"
 
 const CONNECTION = {
     socket:undefined,
@@ -13,26 +14,33 @@ const CONNECTION = {
         })
     },
     parseMessage:function(message){
-        switch(message.type){
-            case "info":
-                console.log(message.data)
-            case "matchjoin":
+        const uncompressed = JSON.parse( pako.inflate(message, { to: 'string' }) );
+        switch (uncompressed.dataType) {
+            case "json":
+                if (uncompressed.data.type === "handshake") {
+                    console.log("Handshake completed successfully.")
+                    this.id = message.data;
+                    loadModalHide()
+                    gameMain()
+                }
                 break;
-            case "handshake":
-                console.log("Handshake completed successfully.")
-                this.id = message.data;
-                loadModalHide()
-                gameMain()
+                
+            default:
+                break;
         }
     }
 }
 
-CONNECTION.socket = new WebSocket("ws://localhost:6479")
-CONNECTION.socket.addEventListener('open',(e)=>{
-    const handshake = new Message(CONNECTION.newMessage('handshake', { intent: 'load' }), "json"); // intent doesn't do anything (yet) but it's better than "Handshake start"
-    const compressed = pako.deflate(JSON.stringify(handshake), { to: 'string' })
-    CONNECTION.socket.send(compressed)
-})
-CONNECTION.socket.addEventListener('message',(e)=>{
-    CONNECTION.parseMessage(JSON.parse(e.data))
-})
+export function INIT_CONNECTION() {
+    CONNECTION.socket = new WebSocket("ws://localhost:6479");
+    CONNECTION.socket.addEventListener('open',(e)=>{
+        const handshake = new Message({ type: 'handshake', data: { intent: 'client' } }, "json"); // intent doesn't do anything (yet) but it's better than "Handshake start"
+        const compressed = pako.deflate(JSON.stringify(handshake), { to: 'string' });
+        CONNECTION.socket.send(compressed);
+    })
+    CONNECTION.socket.addEventListener('message',(e)=>{
+        e.data.arrayBuffer().then(data => {
+            CONNECTION.parseMessage(data);
+        })
+    });
+}
