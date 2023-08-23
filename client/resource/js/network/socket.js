@@ -35,9 +35,8 @@ export function INIT_CONNECTION()
     };
     CONNECTION.socket.addEventListener('open', (e) =>
     {
-        const handshake = new Message('handshake', { intent: 'query' }); // intent doesn't do anything (yet) but it's better than "Handshake start"
-        const compressed = pako.deflate(JSON.stringify(handshake), { to: 'string' });
-        CONNECTION.socket.send(compressed);
+        const handshake = new Message(0, { intent: 'query' }); // intent doesn't do anything (yet) but it's better than "Handshake start"
+        CONNECTION.socket.send(handshake.compress());
     })
     CONNECTION.socket.addEventListener('message', (e) =>
     {

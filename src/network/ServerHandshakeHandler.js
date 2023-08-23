@@ -1,5 +1,6 @@
 const pako = require("pako")
 const { WebSocketServer } = require("ws");
+const { Message } = require("./messages/Message.js");
 
 class ServerHandshakeHandler
 {
@@ -18,7 +19,7 @@ class ServerHandshakeHandler
     {
         if (handshakeData.intent == "query")
         { // could be used for like login auth or smthn, idk
-            let handshake = new Message("handshake", { intent: 'confirm' });
+            let handshake = new Message(0, { intent: 'confirm' });
             let compressed = pako.deflate(JSON.stringify(handshake), { to: 'string' });
             this.socket.send(compressed);
         }

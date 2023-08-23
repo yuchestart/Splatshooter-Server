@@ -12,4 +12,9 @@ export default class Message
         this.time = Date.now();
     }
 
+    compress()
+    {
+        return pako.deflate(JSON.stringify(this), { to: 'string' });
+    }
+
 }
