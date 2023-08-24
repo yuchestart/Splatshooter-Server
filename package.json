@@ -2,9 +2,9 @@
   "name": "splatshooter",
   "version": "0.0",
   "description": "A Splatoon 3 like game that William asked me to make",
-  "main": "npx ts-node index.ts",
+  "main": "npx ts-node --esm index.ts",
   "scripts": {
-    "test_server": "npx ts-node index.ts",
+    "test_server": "npx ts-node --esm index.ts",
     "test_client": "cd client && npx http-server --cors"
   },
   "repository": {
