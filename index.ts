@@ -13,97 +13,128 @@ ERROR CATEGORIZATION:
 4xxx: Application errors
 
 */
-
+//CLIENT
+import express from "express";
+//SERVER
+import config from "./splatshooter_config.json" assert {type: "json"};
 import https from "https";
 import http from "http";
-import { WebSocketServer } from "ws";
+import fs from "fs";
 import pako from "pako";
-import packageJSON from "./package.json" assert {type: "json"};
-const version = packageJSON.version;
-import config from "./config.json" assert {type: "json"};
-import { Message } from "./src/network/messages/Message.ts";
-import { ServerHandshakeHandler } from "./src/network/ServerHandshakeHandler.ts";
-import { APIHandler } from "./src/api/APIHandler.ts";
-import WebSocket from 'ws';
-import { ServerPlayerInteractionHandler } from "./src/network/ServerPlayerInteractionHandler.ts";
-import { ServerPlayer } from "./src/server/ServerPlayer.ts";
-// INIT
-console.log("Splatshooter server - v" + version);
-console.log("Loading...");
-
-console.log("creating http server...");
-// setup http server
-
-let api = new APIHandler();
-
-let server = http.createServer(api.handleServer);
-
-/*
-if (config.secure)
+import WebSocket, { WebSocketServer } from "ws";
+import { Message } from "./server/network/messages/Message.ts";
+import { ServerHandshakeHandler } from "./server/network/ServerHandshakeHandler.ts";
+import { APIHandler } from "./server/api/APIHandler.ts";
+import { ServerPlayerInteractionHandler } from "./server/network/ServerPlayerInteractionHandler.ts";
+import { ServerPlayer } from "./server/player/ServerPlayer.ts";
+// INIT SERVER
+if (config.server.host)
 {
-  server = https.createServer({
-    cert: fs.readFileSync("./cert/certificate.pem"),
-    key: fs.readFileSync("./cert/key.pem"),
-  });
-} else
-{
-  
-  server = http.createServer();
-}*/
-console.log("creating websocket server...");
-// Setup WSS
-const serverSocket = new WebSocketServer({ server });
+  console.log("Splatshooter server - v" + config.server.version);
+  console.log("Loading...");
 
-server.listen(config.port, () =>
-{
-  serverSocket.on("connection", (ws: WebSocket) =>
+  console.log("creating http server...");
+  // setup http server
+
+  let server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse> | https.Server<typeof http.IncomingMessage, typeof http.ServerResponse>;
+
+  if (config.server.ssl)
   {
-    console.log("creating network handlers for new connection...");
+    server = https.createServer({
+      cert: fs.readFileSync(`./${config.server.ssl.certificate}`),
+      key: fs.readFileSync(`./${config.server.ssl.certificate}`),
+    });
+  }
+  else
+  {
+    server = http.createServer(new APIHandler().handleServer);
+  }
+  console.log("creating websocket server...");
+  // Setup WSS
+  const serverSocket = new WebSocketServer({ server });
 
-    const networkHandshakeHandler = new ServerHandshakeHandler(ws);
-    let player: ServerPlayer;
-    let playerInteractionHandler;
-    ws.on("error", console.error);
-
-    ws.on("message", (msg) =>
+  server.listen(config.server, () =>
+  {
+    serverSocket.on("connection", (ws: WebSocket) =>
     {
-      if (isCompressed(msg, true)) {
-        const uncompressed = JSON.parse(pako.inflate(msg as Buffer, { to: 'string' }));
-        if (typeof uncompressed.dataType != "number") {
-          let errorMessage = new Message(-1, { code: 3001 });
-          ws.send(errorMessage.compress());
-          return;
-        }
-        switch (uncompressed.dataType) {
-          case 0:
-            networkHandshakeHandler.onHandshake(uncompressed.data);
-            break;
-          case 1:
+      console.log("creating network handlers for new connection...");
 
-            break;
+      const networkHandshakeHandler = new ServerHandshakeHandler(ws);
+      let player: ServerPlayer;
+      let playerInteractionHandler;
+      ws.on("error", console.error);
 
-          default:
-            break;
+      ws.on("message", (msg) =>
+      {
+        if (isCompressed(msg, true))
+        {
+          const uncompressed = JSON.parse(pako.inflate(msg as Buffer, { to: 'string' }));
+          if (typeof uncompressed.dataType != "number")
+          {
+            let errorMessage = new Message(-1, { code: 3001 });
+            ws.send(errorMessage.compress());
+            return;
+          }
+          switch (uncompressed.dataType)
+          {
+            case 0:
+              networkHandshakeHandler.onHandshake(uncompressed.data);
+              break;
+            case 1:
+
+              break;
+
+            default:
+              break;
+          }
         }
-      }
+      });
     });
   });
-});
 
-function isCompressed(data: string | ArrayBuffer | Buffer[], intended: boolean)
-{
-  try {
-    pako.inflate(data as Buffer);
-    return true;
-  } catch (error) {
-    if (intended)
-      console.warn(
-        "Warning: unintended uncompressed data caught! Data: " + data
-      );
-    return false;
+  function isCompressed (data: string | ArrayBuffer | Buffer[], intended: boolean)
+  {
+    try
+    {
+      pako.inflate(data as Buffer);
+      return true;
+    } catch (error)
+    {
+      if (intended)
+        console.warn(
+          "Warning: unintended uncompressed data caught! Data: " + data
+        );
+      return false;
+    }
   }
+
+  console.log("Server listening on port " + config.server.port);
 }
 
-console.log("Server listening on port " + config.port);
+if (config.client.host && config.server.host) console.log("-------------------------------------------");
 
+if (config.client.host)
+{
+  console.log("Creating client...");
+
+  const client_app = express();
+
+  client_app.use(express.static('client'));
+
+  let clientServer: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse> | https.Server<typeof http.IncomingMessage, typeof http.ServerResponse>;
+
+  if (config.client.ssl)
+  {
+    clientServer = https.createServer({
+      cert: fs.readFileSync(`./${config.server.ssl.certificate}`),
+      key: fs.readFileSync(`./${config.server.ssl.certificate}`),
+    }, client_app);
+  }
+  else
+  {
+    clientServer = http.createServer(client_app);
+  }
+
+  clientServer.listen(443);
+}
 console.log("Done.");

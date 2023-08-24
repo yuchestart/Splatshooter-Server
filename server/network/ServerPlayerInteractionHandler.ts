@@ -1,4 +1,4 @@
-import { ServerPlayer } from "../server/ServerPlayer.ts";
+import { ServerPlayer } from "../player/ServerPlayer.ts";
 
 export { ServerPlayerInteractionHandler };
 
