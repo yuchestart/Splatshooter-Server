@@ -7,7 +7,8 @@
         "ssl": {
             "certificate": "ssl/yourcerthere",
             "key": "ssl/yourkeyhere"
-        }
+        },
+        "maxthreads": 1
     },
     "client": {
         "version": "0.0",

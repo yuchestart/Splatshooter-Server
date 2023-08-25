@@ -2,7 +2,7 @@ import { gameMain } from "../main.js";
 import { loadModalHide } from "../ui/htmlgui.js";
 import Message from "./Message.js"
 
-const CONNECTION = {
+export const CONNECTION = {
     socket: undefined,
     id: undefined,
     parseMessage: function (message)
@@ -17,9 +17,10 @@ const CONNECTION = {
                 console.log("Handshake completed successfully.")
                 this.id = message.data;
                 loadModalHide()
-                gameMain()
                 break;
-
+            case 1:
+                gameMain();
+                break;
             default:
                 break;
         }
@@ -45,4 +46,10 @@ export function INIT_CONNECTION()
             CONNECTION.parseMessage(data);
         })
     });
+}
+
+export function SEND_JOIN_REQUEST(usernameValue)
+{
+    const joinRequest = new Message(1, { username: usernameValue, version: "0.0" })
+    CONNECTION.socket.send(joinRequest.compress())
 }

@@ -14,7 +14,7 @@ export default class Message
 
     compress()
     {
-        return pako.deflate(JSON.stringify(this), { to: 'string' });
+        return pako.deflate(JSON.stringify(this));
     }
 
 }

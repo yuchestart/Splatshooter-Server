@@ -4,8 +4,7 @@
   "description": "A Splatoon 3 like game that William asked me to make",
   "main": "npx ts-node index.ts",
   "scripts": {
-    "test_server": "npx ts-node index.ts",
-    "test_client": "cd client && npx http-server --cors"
+    "test": "npx ts-node index.ts"
   },
   "repository": {
     "type": "git",
@@ -18,14 +17,18 @@
   },
   "homepage": "https://github.com/What-ever-this-is/Splatshooter#readme",
   "dependencies": {
+    "cannon": "^0.6.2",
     "express": "^4.18.2",
     "pako": "^2.1.0",
     "typescript": "^5.1.6",
+    "uuid": "^9.0.0",
     "ws": "^8.13.0"
   },
   "devDependencies": {
+    "@types/cannon": "^0.1.9",
     "@types/express": "^4.17.17",
     "@types/pako": "^2.0.0",
+    "@types/uuid": "^9.0.2",
     "@types/ws": "^8.5.5"
   },
   "type": "module"
