@@ -1,20 +1,25 @@
 import { Vector3d } from "../util/Vector3d.ts";
 import * as uuid from 'uuid';
 import * as cannon from "cannon";
+import { WebSocket } from "ws";
+import { SplatshooterServer } from "../SplatshooterServer.ts";
 
 export { ServerPlayer };
 
 class ServerPlayer
 {
+    readonly server: SplatshooterServer;
     readonly username: string;
     position: Vector3d;
     rotation: Vector3d;
+    latency: number = 0;
     readonly uuid: string;
     team: number;
     body: cannon.Body;
 
-    constructor(username: string)
+    constructor(server: SplatshooterServer, username: string)
     {
+        this.server = server;
         this.username = username;
         this.uuid = uuid.v4();
     }

@@ -7,19 +7,29 @@ export { PlayerList };
 class PlayerList
 {
     private readonly server: SplatshooterServer;
-    private readonly ppt: number;
+    private readonly maxPlayers: number;
     private readonly players: ServerPlayer[] = [];
     private readonly playersByUUID: Map<string, ServerPlayer> = new Map();
 
-    constructor(server: SplatshooterServer, playerperteam: number)
+    constructor(server: SplatshooterServer, maxPlayers: number)
     {
         this.server = server;
-        this.ppt = playerperteam;
+        this.maxPlayers = maxPlayers;
     }
 
     public addNewPlayer (ws: WebSocket, player: ServerPlayer)
     {
         this.players.push(player);
         this.playersByUUID.set(player.getUUID(), player);
+    }
+
+    public getSize ()
+    {
+        return this.players.length;
+    }
+
+    public getMax ()
+    {
+        return this.maxPlayers;
     }
 }

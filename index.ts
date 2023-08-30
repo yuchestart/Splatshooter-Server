@@ -26,14 +26,13 @@ import WebSocket, { WebSocketServer } from "ws";
 import { Message } from "./server/network/messages/Message.ts";
 import { ServerHandshakeHandler } from "./server/network/ServerHandshakeHandler.ts";
 import { APIHandler } from "./server/api/APIHandler.ts";
-import { ServerPlayerInteractionHandler } from "./server/network/ServerPlayerInteractionHandler.ts";
+import { ServerPlayerInteractionHandler } from "./server/network/ServerPlayerMessageHandler.ts";
 import { ServerPlayer } from "./server/player/ServerPlayer.ts";
 import { SplatshooterServer } from "./server/SplatshooterServer.ts";
 export let matchPlayers: Map<number, ServerPlayer>;
 // INIT SERVER
 if (config.server.host)
 {
-  const splatserver = new SplatshooterServer();
 
   console.log("Splatshooter server - v" + config.server.version);
   console.log("Loading...");
@@ -59,47 +58,10 @@ if (config.server.host)
 
   httpServer.listen(config.server.port, () =>
   {
-    serverSocket.on("connection", (ws: WebSocket) =>
-    {
-
-      const networkHandshakeHandler = new ServerHandshakeHandler(ws);
-      let player: ServerPlayer;
-      let playerInteractionHandler: ServerPlayerInteractionHandler;
-      ws.on("error", console.error);
-
-      ws.on("message", (msg) =>
-      {
-        if (isCompressed(msg, true))
-        {
-          const uncompressed = JSON.parse(pako.inflate(msg as Buffer, { to: 'string' }));
-          if (typeof uncompressed.dataType != "number")
-          {
-            let errorMessage = new Message(-1, { code: 3001 });
-            ws.send(errorMessage.compress());
-            return;
-          }
-          switch (uncompressed.dataType)
-          {
-            case 0:
-              networkHandshakeHandler.onHandshake(uncompressed.data);
-              break;
-            case 1:
-              if (uncompressed.data.version != config.server.version)
-              {
-                let errorMessage = new Message(-1, { code: 4001 });
-                ws.send(errorMessage.compress());
-                break;
-              }
-              player = new ServerPlayer(uncompressed.data.username);
-              playerInteractionHandler = new ServerPlayerInteractionHandler(player, ws);
-              break;
-            default:
-              break;
-          }
-        }
-      });
-    });
+    const splatserver = new SplatshooterServer(serverSocket);
+    splatserver.runServer();
   });
+
 
   console.log("Server listening on port " + config.server.port);
 }
