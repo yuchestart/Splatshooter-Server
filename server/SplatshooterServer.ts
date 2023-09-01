@@ -10,12 +10,14 @@ import WebSocket, { WebSocketServer } from "ws";
 import { Message } from "./network/messages/Message.ts";
 import { ServerHandshakeHandler } from "./network/ServerHandshakeHandler.ts";
 import { APIHandler } from "./api/APIHandler.ts";
-import { ServerPlayerInteractionHandler } from "./network/ServerPlayerMessageHandler.ts";
+import { ServerPlayerMessageHandler } from "./network/ServerPlayerMessageHandler.ts";
 import { ServerPlayer } from "./player/ServerPlayer.ts";
 import { Util } from "./util/Util.ts";
 const ClientboundMessageTypes = Util.ClientboundMessageTypes;
 const ServerboundMessageTypes = Util.ServerboundMessageTypes;
 import { PlayerList } from "./player/PlayerList.ts";
+import { ChatList } from "./chat/ChatList.ts";
+import { ChatMessage } from "./chat/ChatMessage.ts";
 
 export { SplatshooterServer };
 
@@ -28,14 +30,14 @@ Packet values:
 class SplatshooterServer
 {
     running = true;
-    requestsQueue: { message: Message, player: ServerPlayer, handler: ServerPlayerInteractionHandler, ws: WebSocket; }[] = []; // ??? i guess ???
+    requestsQueue: { message: Message, player: ServerPlayer; }[] = []; // ??? i guess ???
     physicsWorld: CANNON.World;
     readonly socketServer: WebSocket.WebSocketServer;
     keepAliveTime: number = performance.now();
     keepAlivePending: boolean;
     keepAliveChallenge: number = 0;
-    playerList: PlayerList = new PlayerList(this, 6);
-    playerMessageHandlers: Map<ServerPlayer, ServerPlayerInteractionHandler> = new Map();
+    playerList: PlayerList = new PlayerList(this, 12);
+    chat: ChatList = new ChatList(this);
 
 
     constructor(socketServer: WebSocketServer)
@@ -43,16 +45,34 @@ class SplatshooterServer
         this.socketServer = socketServer;
     }
 
+    canJoinServer (data, ws: WebSocket)
+    {
+        if (data.version != config.server.version)
+        {
+            this.disconnect(ws, "Mismatched Version! I'm on " + config.server.version);
+            return false;
+        }
+        else if (this.playerList.getPlayers().length >= this.playerList.getMax())
+        {
+            this.disconnect(ws, "Server is full!");
+            return false;
+        }
+
+        return true;
+    }
+
     initServer ()
     {
+        if (this.playerList.getMax() > 24)
+        {
+            console.error("Too many players! Maximum is 24.");
+            return false;
+        }
         this.socketServer.on("connection", (ws: WebSocket) =>
         {
             let networkHandshakeHandler: ServerHandshakeHandler = new ServerHandshakeHandler(this, ws);
             let connectedPlayer: ServerPlayer = null;
-            let connectedPlayerHandler: ServerPlayerInteractionHandler = null;
             let hasPlayer = false;
-
-            console.log("connection");
 
             ws.on("message", (msg) =>
             {
@@ -69,93 +89,116 @@ class SplatshooterServer
                 {
                     switch (uncompressed.dataType)
                     {
+                        case ServerboundMessageTypes.ERROR:
+                            console.warn("Caught error message from client: " + uncompressed.data);
+                            break;
                         case ServerboundMessageTypes.HANDSHAKE:
                             networkHandshakeHandler.onHandshake(uncompressed.data);
                             break;
                         case ServerboundMessageTypes.LOGIN:
-                            if (uncompressed.data.version != config.server.version)
+
+                            if (this.canJoinServer(uncompressed.data, ws))
                             {
-                                let errorMessage = new Message(ClientboundMessageTypes.ERROR, { code: 4001 });
-                                ws.send(errorMessage.compress());
-                                break;
+                                console.log(`Player ${uncompressed.data.username} joined the game`);
+                                this.playerList.addNewPlayer(ws, new ServerPlayer(this, uncompressed.data.username));
+                                hasPlayer = true;
+                                this.requestsQueue.push({ message: uncompressed, player: connectedPlayer });
                             }
-                            console.log(`Player ${uncompressed.data.username} joined the game`);
-                            connectedPlayer = new ServerPlayer(this, uncompressed.data.username);
-                            connectedPlayerHandler = new ServerPlayerInteractionHandler(connectedPlayer, ws);
-                            this.playerMessageHandlers.set(connectedPlayer, connectedPlayerHandler);
-                            hasPlayer = true;
                             break;
                         default:
+                            console.warn("Unknown data type while player has not been created! Sending to request queue, but may cause issues. Data Type is " + uncompressed.dataType);
+                            this.requestsQueue.push({ message: uncompressed, player: connectedPlayer });
                             break;
                     }
                 }
                 else
                 {
-                    this.requestsQueue.push({ message: uncompressed, player: connectedPlayer, handler: connectedPlayerHandler, ws: ws });
+                    this.requestsQueue.push({ message: uncompressed, player: connectedPlayer });
                 }
             });
             ws.on("close", (code, reason) =>
             {
-                this.playerMessageHandlers.delete(connectedPlayer);
-                connectedPlayer = undefined;
-                connectedPlayerHandler = undefined;
-                hasPlayer = false;
+                if (connectedPlayer)
+                {
+                    connectedPlayer = undefined;
+                    hasPlayer = false;
+                    this;
+                }
             });
         });
+        return true;
     }
 
     runServer ()
     {
-        this.initServer();
-
-        this.physicsWorld = new CANNON.World();
-
-
-        const targetTicksPerSecond = 30;
-        const tickIntervalMs = 1000 / targetTicksPerSecond;
-        let lastTickTime = Date.now();
-        let prevDelay = 1 / 30;
-
-        const iteration = () =>
+        if (!this.initServer())
         {
-            if (this.running)
+            console.error("ERROR INITIALIZING SERVER!");
+            return;
+        }
+        else
+        {
+            this.physicsWorld = new CANNON.World();
+
+
+            const targetTicksPerSecond = 30;
+            const tickIntervalMs = 1000 / targetTicksPerSecond;
+            let lastTickTime = Date.now();
+            let prevDelay = 1 / 30;
+
+            const iteration = () =>
             {
-                const currentTime = Date.now();
-                const elapsed = currentTime - lastTickTime;
-
-                this.physicsWorld.step(prevDelay);
-
-                this.playerMessageHandlers.forEach((handler, player) =>
+                if (this.running)
                 {
-                    handler.tick();
-                });
+                    const currentTime = Date.now();
+                    const elapsed = currentTime - lastTickTime;
 
-                this.requestsQueue.forEach((data, index) =>
-                {
-                    const message = data.message;
-                    const handler = data.handler;
-                    switch (message.dataType)
+                    this.physicsWorld.step(prevDelay);
+
+                    this.playerList.getPlayerMessageHandlers().forEach((handler, player) =>
                     {
-                        case ServerboundMessageTypes.KEEPALIVE:
-                            handler.onKeepAlive(message as any);
-                            break;
-                        default:
-                            break;
-                    }
-                });
+                        if (!player.disconnecting)
+                        {
+                            handler.tick();
+                        }
+                    });
 
-                lastTickTime = currentTime;
+                    this.requestsQueue.forEach((data, index) =>
+                    {
+                        const message = data.message;
+                        switch (message.dataType)
+                        {
+                            case ServerboundMessageTypes.KEEPALIVE:
+                                this.playerList.getPlayerMessageHandlers().get(data.player).onKeepAlive(message as any);
+                                break;
+                            case ServerboundMessageTypes.CHAT:
+                                this.chat.postMessage(new ChatMessage(data.player, message.data.to, message.data.text));
+                                break;
+                            default:
+                                console.warn("Unknown message type " + message.dataType + " recieved!");
+                                break;
+                        }
+                    });
 
-                // Calculate the delay for the next tick
-                const delay = Math.max(tickIntervalMs - elapsed, 0);
-                prevDelay = delay;
-                // Schedule the next iteration with the adjusted delay
-                setTimeout(iteration, delay);
-            }
-        };
+                    lastTickTime = currentTime;
 
-        // Start the first iteration
-        iteration();
+                    // Calculate the delay for the next tick
+                    const delay = Math.max(tickIntervalMs - elapsed, 0);
+                    prevDelay = delay;
+                    // Schedule the next iteration with the adjusted delay
+                    setTimeout(iteration, delay);
+                }
+            };
+
+            // Start the first iteration
+            iteration();
+        }
+    }
+    disconnect (ws: WebSocket, disconnectText: string)
+    {
+        const disconnect = new Message(ClientboundMessageTypes.DISCONNECT, { text: disconnectText });
+        ws.send(disconnect.compress());
+        ws.close(3000, disconnectText);
     }
     stop ()
     {
@@ -180,6 +223,6 @@ class SplatshooterServer
 
     getStatus ()
     {
-        return { playersOnline: this.playerList.getSize(), maxPlayers: this.playerList.getMax() };
+        return { playersOnline: this.playerList.getPlayers().length, maxPlayers: this.playerList.getMax() };
     }
 }

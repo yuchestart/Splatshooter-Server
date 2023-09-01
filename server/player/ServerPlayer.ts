@@ -16,6 +16,7 @@ class ServerPlayer
     readonly uuid: string;
     team: number;
     body: cannon.Body;
+    disconnecting: boolean = false;
 
     constructor(server: SplatshooterServer, username: string)
     {

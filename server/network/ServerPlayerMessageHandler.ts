@@ -1,11 +1,13 @@
 import { WebSocket } from "ws";
 import { ServerPlayer } from "../player/ServerPlayer.ts";
 import { Message } from "./messages/Message.ts";
+import { Util } from "../util/Util.ts";
+const ClientboundMessageTypes = Util.ClientboundMessageTypes;
 
 
-export { ServerPlayerInteractionHandler };
+export { ServerPlayerMessageHandler };
 
-class ServerPlayerInteractionHandler
+class ServerPlayerMessageHandler
 {
 
     readonly player: ServerPlayer;
@@ -14,6 +16,8 @@ class ServerPlayerInteractionHandler
     keepAlivePending: boolean;
     keepAliveTime: number;
     keepAliveChallenge: number;
+
+    hasClosed = false;
 
     /**
     * The server's handler for a client's handshake request.
@@ -34,20 +38,20 @@ class ServerPlayerInteractionHandler
         {
             if (this.keepAlivePending)
             {
-                this.disconnect(this.ws, "Timed Out.");
+                this.disconnect("Timed Out.");
             } else
             {
                 this.keepAlivePending = true;
                 this.keepAliveTime = i;
                 this.keepAliveChallenge = i;
-                const keepAlive = new Message(2, { id: this.keepAliveChallenge });
+                const keepAlive = new Message(ClientboundMessageTypes.KEEPALIVE, { id: this.keepAliveChallenge });
                 this.ws.send(keepAlive.compress());
             }
         }
     }
 
     /**
-     * Handles a player joining a game once the handshake is complete and the play button is pressed
+     * Handles a player joining a game once the handshake is complete and the login is processed
      * @param playerJoinData
      */
     onPlayerJoin (playerJoinData: object)
@@ -65,14 +69,21 @@ class ServerPlayerInteractionHandler
         }
         else
         {
-            this.disconnect(this.ws, "Timed out.");
+            this.disconnect("Timed out.");
         }
     }
 
-    disconnect (ws: WebSocket, disconnectText: string)
+    onChatMessage (from: ServerPlayer, text: string)
     {
-        const disconnect = new Message(-2, { text: disconnectText });
-        ws.send(disconnect.compress());
-        ws.close(3000, disconnectText);
+        const chat = new Message(ClientboundMessageTypes.CHAT, { from, text });
+        this.ws.send(chat.compress());
+    }
+
+    disconnect (disconnectText: string)
+    {
+        const disconnect = new Message(ClientboundMessageTypes.DISCONNECT, { text: disconnectText });
+        this.player.disconnecting = true;
+        this.ws.send(disconnect.compress());
+        this.ws.close(3000, disconnectText);
     }
 }

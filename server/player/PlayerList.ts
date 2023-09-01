@@ -1,6 +1,7 @@
 import { WebSocket } from "ws";
 import { ServerPlayer } from "./ServerPlayer.ts";
 import { SplatshooterServer } from "../SplatshooterServer.ts";
+import { ServerPlayerMessageHandler } from "../network/ServerPlayerMessageHandler.ts";
 
 export { PlayerList };
 
@@ -10,6 +11,7 @@ class PlayerList
     private readonly maxPlayers: number;
     private readonly players: ServerPlayer[] = [];
     private readonly playersByUUID: Map<string, ServerPlayer> = new Map();
+    private readonly playerMessageHandlers: Map<ServerPlayer, ServerPlayerMessageHandler> = new Map();
 
     constructor(server: SplatshooterServer, maxPlayers: number)
     {
@@ -21,11 +23,18 @@ class PlayerList
     {
         this.players.push(player);
         this.playersByUUID.set(player.getUUID(), player);
+        const handler = new ServerPlayerMessageHandler(player, ws);
+        this.playerMessageHandlers.set(player, handler);
     }
 
-    public getSize ()
+    public getPlayerMessageHandlers ()
     {
-        return this.players.length;
+        return this.playerMessageHandlers;
+    }
+
+    public getPlayers ()
+    {
+        return this.players;
     }
 
     public getMax ()

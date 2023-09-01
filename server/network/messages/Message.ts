@@ -1,12 +1,12 @@
-import Pako from "pako"
+import Pako from "pako";
 
-export { Message }
+export { Message };
 
 class Message
 {
 
     dataType: number = -1;
-    data: object = { code: 3002 };
+    data: any = { code: 3002 };
     time: number = 0;
 
     /**
@@ -21,7 +21,7 @@ class Message
         this.time = Date.now();
     }
 
-    compress()
+    compress ()
     {
         return Pako.deflate(JSON.stringify(this));
     }
