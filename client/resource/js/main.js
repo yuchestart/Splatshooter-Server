@@ -33,8 +33,8 @@ function main()
     let usernameValue = document.getElementById("username").value
     if (usernameValue)
     {
-      const joinRequest = new Message(Util.ServerboundMessageTypes.HANDSHAKE, { username: usernameValue, version: LATEST_SERVER_VERSION })
-      CONNECTION.socket.send(joinRequest.compress())
+      //const joinRequest = new Message(Util.ServerboundMessageTypes.HANDSHAKE, { username: usernameValue, version: LATEST_SERVER_VERSION })
+      //CONNECTION.socket.send(joinRequest.compress())
       SEND_JOIN_REQUEST(usernameValue)
     }
     else
