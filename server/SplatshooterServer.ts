@@ -103,18 +103,18 @@ class SplatshooterServer
                                 LOGGER.info(`Player ${uncompressed.data.username} joined the game`);
                                 this.playerList.addNewPlayer(ws, new ServerPlayer(this, uncompressed.data.username));
                                 hasPlayer = true;
-                                this.requestsQueue.push({ message: uncompressed, player: connectedPlayer });
+                                this.requestsQueue.push(new QueuedMessage(uncompressed, connectedPlayer));
                             }
                             break;
                         default:
                             LOGGER.warn("Unknown data type while player has not been created! Sending to request queue, but may cause issues. Data Type is " + uncompressed.dataType);
-                            this.requestsQueue.push({ message: uncompressed, player: connectedPlayer });
+                            this.requestsQueue.push(new QueuedMessage(uncompressed, connectedPlayer));
                             break;
                     }
                 }
                 else
                 {
-                    this.requestsQueue.push({ message: uncompressed, player: connectedPlayer });
+                    this.requestsQueue.push(new QueuedMessage(uncompressed, connectedPlayer));
                 }
             });
             ws.on("close", (code, reason) =>
@@ -127,6 +127,9 @@ class SplatshooterServer
                 }
             });
         });
+
+        this.physicsWorld = new CANNON.World();
+
         return true;
     }
 
@@ -139,9 +142,6 @@ class SplatshooterServer
         }
         else
         {
-            this.physicsWorld = new CANNON.World();
-
-
             const targetTicksPerSecond = 30;
             const tickIntervalMs = 1000 / targetTicksPerSecond;
             let lastTickTime = Date.now();
@@ -180,6 +180,7 @@ class SplatshooterServer
                                 break;
                         }
                     });
+                    this.requestsQueue = [];
 
                     lastTickTime = currentTime;
 
