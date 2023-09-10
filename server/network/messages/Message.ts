@@ -12,9 +12,9 @@ class Message
     /**
      * A generic message type.
      * @param {number} type
-     * @param {object} data 
+     * @param {any} data 
      */
-    constructor(type: number, data: object)
+    constructor(type: number, data: any)
     {
         this.dataType = type;
         this.data = data;

@@ -4,18 +4,18 @@
   "description": "A Splatoon 3 like game that William asked me to make",
   "main": "npx ts-node index.ts",
   "scripts": {
-    "test": "npx ts-node index.ts"
+    "dev": "npx ts-node index.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/What-ever-this-is/Splatshooter.git"
+    "url": "git+https://github.com/yuchestart/Splatshooter.git"
   },
   "author": "Splatshooter Dev Team",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/What-ever-this-is/Splatshooter/issues"
+    "url": "https://github.com/yuchestart/Splatshooter/issues"
   },
-  "homepage": "https://github.com/What-ever-this-is/Splatshooter#readme",
+  "homepage": "https://github.com/yuchestart/Splatshooter#readme",
   "dependencies": {
     "cannon": "^0.6.2",
     "express": "^4.18.2",

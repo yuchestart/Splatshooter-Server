@@ -1,5 +1,6 @@
 import { gameMain } from "../main.js";
 import { loadModalHide } from "../ui/htmlgui.js";
+import { Util } from "../util/Util.js";
 import Message from "./Message.js"
 
 export const CONNECTION = {
@@ -14,7 +15,7 @@ export const CONNECTION = {
             case -1:
                 console.error("Error %d", uncompressed.data.code)
                 break;
-            case 0:
+            case Util.ClientboundMessageTypes.HANDSHAKE:
                 console.log("Handshake completed successfully.")
                 this.id = message.data;
                 loadModalHide()
@@ -24,7 +25,7 @@ export const CONNECTION = {
                 break;
             case 2:
                 console.log("keep aldive")
-                const keepAlive = new Message(2, { id: uncompressed.data.id })
+                const keepAlive = new Message(Util.ServerboundMessageTypes.KEEPALIVE, { id: uncompressed.data.id })
                 this.socket.send(keepAlive.compress());
                 break;
             default:
@@ -38,11 +39,12 @@ export function INIT_CONNECTION()
     CONNECTION.socket = new WebSocket("ws://localhost:6479");
     CONNECTION.socket.onclose = (event) =>
     {
-        console.log(event);
+        console.log("Socket closed");
+        CONNECTION.socket = null;
     };
     CONNECTION.socket.addEventListener('open', (e) =>
     {
-        const handshake = new Message(0, { intent: 'login' });
+        const handshake = new Message(Util.ServerboundMessageTypes.HANDSHAKE, { intent: 'status' });
         CONNECTION.socket.send(handshake.compress());
     })
     CONNECTION.socket.addEventListener('message', (e) =>

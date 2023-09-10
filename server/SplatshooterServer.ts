@@ -18,6 +18,8 @@ const ServerboundMessageTypes = Util.ServerboundMessageTypes;
 import { PlayerList } from "./player/PlayerList.ts";
 import { ChatList } from "./chat/ChatList.ts";
 import { ChatMessage } from "./chat/ChatMessage.ts";
+import { QueuedMessage } from "./network/messages/QueuedMessage.ts";
+import { LOGGER } from "../index.ts";
 
 export { SplatshooterServer };
 
@@ -30,7 +32,7 @@ Packet values:
 class SplatshooterServer
 {
     running = true;
-    requestsQueue: { message: Message, player: ServerPlayer; }[] = []; // ??? i guess ???
+    requestsQueue: QueuedMessage[] = [];
     physicsWorld: CANNON.World;
     readonly socketServer: WebSocket.WebSocketServer;
     keepAliveTime: number = performance.now();
@@ -38,7 +40,7 @@ class SplatshooterServer
     keepAliveChallenge: number = 0;
     playerList: PlayerList = new PlayerList(this, 12);
     chat: ChatList = new ChatList(this);
-
+    handshakeHandler: ServerHandshakeHandler;
 
     constructor(socketServer: WebSocketServer)
     {
@@ -65,19 +67,18 @@ class SplatshooterServer
     {
         if (this.playerList.getMax() > 24)
         {
-            console.error("Too many players! Maximum is 24.");
+            LOGGER.error("Too many players! Maximum is 24.");
             return false;
         }
+        this.handshakeHandler = new ServerHandshakeHandler(this);
         this.socketServer.on("connection", (ws: WebSocket) =>
         {
-            let networkHandshakeHandler: ServerHandshakeHandler = new ServerHandshakeHandler(this, ws);
             let connectedPlayer: ServerPlayer = null;
             let hasPlayer = false;
 
             ws.on("message", (msg) =>
             {
                 const uncompressed = JSON.parse(pako.inflate(msg as Buffer, { to: 'string' }));
-                console.log(uncompressed.data);
                 if (typeof uncompressed.dataType != "number")
                 {
                     let errorMessage = new Message(ClientboundMessageTypes.ERROR, { code: 3001 });
@@ -90,23 +91,23 @@ class SplatshooterServer
                     switch (uncompressed.dataType)
                     {
                         case ServerboundMessageTypes.ERROR:
-                            console.warn("Caught error message from client: " + uncompressed.data);
+                            LOGGER.warn("Caught error message from client: " + uncompressed.data);
                             break;
                         case ServerboundMessageTypes.HANDSHAKE:
-                            networkHandshakeHandler.onHandshake(uncompressed.data);
+                            this.handshakeHandler.onHandshake(uncompressed.data, ws);
                             break;
                         case ServerboundMessageTypes.LOGIN:
 
                             if (this.canJoinServer(uncompressed.data, ws))
                             {
-                                console.log(`Player ${uncompressed.data.username} joined the game`);
+                                LOGGER.info(`Player ${uncompressed.data.username} joined the game`);
                                 this.playerList.addNewPlayer(ws, new ServerPlayer(this, uncompressed.data.username));
                                 hasPlayer = true;
                                 this.requestsQueue.push({ message: uncompressed, player: connectedPlayer });
                             }
                             break;
                         default:
-                            console.warn("Unknown data type while player has not been created! Sending to request queue, but may cause issues. Data Type is " + uncompressed.dataType);
+                            LOGGER.warn("Unknown data type while player has not been created! Sending to request queue, but may cause issues. Data Type is " + uncompressed.dataType);
                             this.requestsQueue.push({ message: uncompressed, player: connectedPlayer });
                             break;
                     }
@@ -120,9 +121,9 @@ class SplatshooterServer
             {
                 if (connectedPlayer)
                 {
+                    this.chat.postMessage(new ChatMessage(null, null, connectedPlayer.getName()));
                     connectedPlayer = undefined;
                     hasPlayer = false;
-                    this;
                 }
             });
         });
@@ -133,7 +134,7 @@ class SplatshooterServer
     {
         if (!this.initServer())
         {
-            console.error("ERROR INITIALIZING SERVER!");
+            LOGGER.error("ERROR INITIALIZING SERVER!");
             return;
         }
         else
@@ -175,7 +176,7 @@ class SplatshooterServer
                                 this.chat.postMessage(new ChatMessage(data.player, message.data.to, message.data.text));
                                 break;
                             default:
-                                console.warn("Unknown message type " + message.dataType + " recieved!");
+                                LOGGER.warn("Unknown message type " + message.dataType + " recieved!");
                                 break;
                         }
                     });
@@ -214,7 +215,7 @@ class SplatshooterServer
         } catch (error)
         {
             if (intended)
-                console.warn(
+                LOGGER.warn(
                     "Warning: unintended uncompressed data caught! Data: " + data
                 );
             return false;

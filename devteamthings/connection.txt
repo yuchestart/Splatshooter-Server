@@ -1,8 +1,8 @@
 MESSAGES SENT BETWEEN SPLATSHOOTER AND THE CLIENT ARE IN THIS FORMAT:
 {
-    "type":number // It specifies what kind of message is sent (refer to the top of index.ts)
-    "data":object // Specifies the data in the message
-    "timestamp":"00:54 on Thursday, Jan 1 1970" //*OPTIONAL* What time the message was sent
+    "type":number // Specifies what kind of message is sent (refer to Util.ts)
+    "data":any // Specifies the data in the message
+    "timestamp":number //What time the message was sent. Automagically assigned.
 }
 With the new WebSocket code, you can access websockets from anywhere.
 This means we can make Splatshooter unblockable.

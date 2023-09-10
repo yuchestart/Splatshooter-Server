@@ -4,9 +4,11 @@
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "module": "ESNext",
-        "target": "ES6",
+        "target": "ES5",
         "noEmit": true,
-        "allowImportingTsExtensions": true
+        "allowImportingTsExtensions": true,
+        "jsx": "react",
+        "allowJs": true
     },
     "ts-node": {
         "esm": true

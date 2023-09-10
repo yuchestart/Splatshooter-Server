@@ -3,6 +3,7 @@ import { Message } from "./messages/Message.ts";
 import WebSocket from "ws";
 import { SplatshooterServer } from "../SplatshooterServer.ts";
 import { Util } from "../util/Util.ts";
+import { LOGGER } from "../../index.ts";
 const ClientboundMessageTypes = Util.ClientboundMessageTypes;
 
 export { ServerHandshakeHandler };
@@ -10,36 +11,33 @@ export { ServerHandshakeHandler };
 class ServerHandshakeHandler
 {
     server: SplatshooterServer;
-    socket: WebSocket;
 
     /**
     * The server's handler for a client's handshake request.
     * @constructor
     * @param {SplatshooterServer} server
-    * @param {WebSocket} socketConnection
     */
-    constructor(server: SplatshooterServer, socketConnection: WebSocket)
+    constructor(server: SplatshooterServer)
     {
         this.server = server;
-        this.socket = socketConnection;
     };
 
-    onHandshake (handshakeData: { intent: string; })
+    onHandshake (handshakeData: { intent: string; }, socket: WebSocket)
     {
         switch (handshakeData.intent)
         {
             case "status":
                 let status = this.server.getStatus();
                 let statusMessage = new Message(ClientboundMessageTypes.STATUS, { playersOnline: status.playersOnline, maxPlayers: status.maxPlayers });
-                this.socket.send(statusMessage.compress());
+                socket.send(statusMessage.compress());
                 break;
             case "login":
                 let handshake = new Message(ClientboundMessageTypes.HANDSHAKE, { intent: 'confirm' });
                 let compressed = pako.deflate(JSON.stringify(handshake));
-                this.socket.send(compressed);
+                socket.send(compressed);
                 break;
             default:
-                console.warn("Warning: invalid intent " + handshakeData.intent + " recieved!");
+                LOGGER.warn("Warning: invalid intent " + handshakeData.intent + " recieved!");
                 break;
         }
     }

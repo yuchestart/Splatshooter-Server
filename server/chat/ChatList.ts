@@ -1,3 +1,4 @@
+import { LOGGER } from "../../index.ts";
 import { SplatshooterServer } from "../SplatshooterServer.ts";
 import { ChatMessage } from "./ChatMessage.ts";
 
@@ -17,19 +18,26 @@ class ChatList
     }
 
     /**
-     * postMessage
+     * Posts a message to the chat list.
+     * @param {ChatMessage} chatMessage The chat message to send to the clients.
      */
     public postMessage (chatMessage: ChatMessage)
     {
         this.serverChat.unshift(chatMessage);
-        if (chatMessage.sendTo != null)
+        LOGGER.info(`Sending chat message to ${chatMessage.sendTo.getName()} from ${chatMessage.from.getName()}`);
+        const playerListPlayer = this.server.playerList.getPlayers().find((player) => player == chatMessage.sendTo);
+        if (playerListPlayer != undefined)
         {
-            const playerListPlayer = this.server.playerList.getPlayers().find((player) => player == chatMessage.sendTo);
-            if (playerListPlayer != null)
+            const handler = this.server.playerList.getPlayerMessageHandlers().get(playerListPlayer);
+            handler.onChatMessage(chatMessage.from, chatMessage.text);
+        }
+        else
+        {
+            this.server.playerList.getPlayers().forEach((player) =>
             {
-                const handler = this.server.playerList.getPlayerMessageHandlers().get(playerListPlayer);
+                const handler = this.server.playerList.getPlayerMessageHandlers().get(player);
                 handler.onChatMessage(chatMessage.from, chatMessage.text);
-            }
+            });
         }
     }
 

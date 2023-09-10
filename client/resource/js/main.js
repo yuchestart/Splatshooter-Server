@@ -1,6 +1,7 @@
 import Message from "./network/Message.js";
 import { CONNECTION, INIT_CONNECTION, SEND_JOIN_REQUEST } from "./network/socket.js";
 import { INIT_GAME } from "./render/Initialize.js"
+import { Util } from "./util/Util.js";
 
 
 let CONFIG;
@@ -32,7 +33,7 @@ function main()
     let usernameValue = document.getElementById("username").value
     if (usernameValue)
     {
-      const joinRequest = new Message(1, { username: usernameValue, version: LATEST_SERVER_VERSION })
+      const joinRequest = new Message(Util.ServerboundMessageTypes.HANDSHAKE, { username: usernameValue, version: LATEST_SERVER_VERSION })
       CONNECTION.socket.send(joinRequest.compress())
       SEND_JOIN_REQUEST(usernameValue)
     }

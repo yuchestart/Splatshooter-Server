@@ -20,20 +20,22 @@ import config from "./splatshooter_config.json" assert {type: "json"};
 import https from "https";
 import http from "http";
 import fs from "fs";
-import pako from "pako";
-import WebSocket, { WebSocketServer } from "ws";
+import { WebSocketServer } from "ws";
 import { APIHandler } from "./server/api/APIHandler.ts";
-import { ServerPlayer } from "./server/player/ServerPlayer.ts";
 import { SplatshooterServer } from "./server/SplatshooterServer.ts";
-export let matchPlayers: Map<number, ServerPlayer>;
+import { Util } from "./server/util/Util.ts";
+
+
+export { LOGGER };
+const LOGGER = Util.getLogger("Splatshooter");
+
 // INIT SERVER
 if (config.server.host)
 {
+  LOGGER.info(`Splatshooter server - v${config.server.version}`);
+  LOGGER.info("Loading...");
 
-  console.log("Splatshooter server - v" + config.server.version);
-  console.log("Loading...");
-
-  console.log("creating http server...");
+  LOGGER.info("Creating http server...");
   // setup http server
   let httpServer: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse> | https.Server<typeof http.IncomingMessage, typeof http.ServerResponse>;
 
@@ -46,27 +48,31 @@ if (config.server.host)
   }
   else
   {
-    httpServer = http.createServer(new APIHandler().handleServer);
+    httpServer = http.createServer();
   }
-  console.log("creating websocket server...");
+  LOGGER.info("creating websocket server...");
   // Setup WSS
   const serverSocket = new WebSocketServer({ server: httpServer });
-
+  const splatserver = new SplatshooterServer(serverSocket);
   httpServer.listen(config.server.port, () =>
   {
-    const splatserver = new SplatshooterServer(serverSocket);
     splatserver.runServer();
+    httpServer.on("request", (req, res) =>
+    {
+      APIHandler.handleServer(req, res, splatserver);
+    });
   });
 
 
-  console.log("Server listening on port " + config.server.port);
+  LOGGER.info(`Server listening on port ${config.server.port}`);
 }
 
-if (config.client.host && config.server.host) console.log("-------------------------------------------");
+if (config.client.host && config.server.host) LOGGER.info("-------------------------------------------");
 
 if (config.client.host)
 {
-  console.log("Creating client...");
+  LOGGER.info(`Splatshooter client - v${config.client.version}`);
+  LOGGER.info("Loading...");
 
   const client_app = express();
 
@@ -87,21 +93,7 @@ if (config.client.host)
   }
   clientServer.listen(config.client.port);
 
-}
-console.log("Done.");
 
-function isCompressed (data: string | ArrayBuffer | Buffer[], intended: boolean)
-{
-  try
-  {
-    pako.inflate(data as Buffer);
-    return true;
-  } catch (error)
-  {
-    if (intended)
-      console.warn(
-        "Warning: unintended uncompressed data caught! Data: " + data
-      );
-    return false;
-  }
+  LOGGER.info(`Client listening on port ${config.client.port}`);
 }
+LOGGER.info("Done.");
