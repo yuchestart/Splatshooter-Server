@@ -76,7 +76,13 @@ if (config.client.host)
 
   const client_app = express();
 
-  client_app.use(express.static('client'));
+  client_app.use(express.static('client', {
+    setHeaders: (res, path) =>
+    {
+      // Set Cache-Control header to 'no-cache' for all static files
+      res.setHeader('Cache-Control', 'no-cache, no-store');
+    }
+  }));
 
   let clientServer: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse> | https.Server<typeof http.IncomingMessage, typeof http.ServerResponse>;
 

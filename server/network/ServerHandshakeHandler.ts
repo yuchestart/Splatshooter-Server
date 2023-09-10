@@ -22,7 +22,7 @@ class ServerHandshakeHandler
         this.server = server;
     };
 
-    onHandshake (handshakeData: { intent: string; }, socket: WebSocket)
+    onHandshake (handshakeData: any, socket: WebSocket)
     {
         switch (handshakeData.intent)
         {
@@ -37,7 +37,7 @@ class ServerHandshakeHandler
                 socket.send(compressed);
                 break;
             default:
-                LOGGER.warn("Warning: invalid intent " + handshakeData.intent + " recieved!");
+                LOGGER.warn("Invalid intent " + handshakeData.intent + " recieved!");
                 break;
         }
     }

@@ -67,7 +67,7 @@ class SplatshooterServer
     {
         if (this.playerList.getMax() > 24)
         {
-            LOGGER.error("Too many players! Maximum is 24.");
+            LOGGER.error("Too many players in config! Maximum is 24.");
             return false;
         }
         this.handshakeHandler = new ServerHandshakeHandler(this);
@@ -76,9 +76,12 @@ class SplatshooterServer
             let connectedPlayer: ServerPlayer = null;
             let hasPlayer = false;
 
+            console.log("connected");
+
             ws.on("message", (msg) =>
             {
-                const uncompressed = JSON.parse(pako.inflate(msg as Buffer, { to: 'string' }));
+                const uncompressed = JSON.parse(pako.inflate(msg as any, { to: 'string' }));
+                LOGGER.info("PRE: " + JSON.stringify(uncompressed));
                 if (typeof uncompressed.dataType != "number")
                 {
                     let errorMessage = new Message(ClientboundMessageTypes.ERROR, { code: 3001 });
