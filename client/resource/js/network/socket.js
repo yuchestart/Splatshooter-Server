@@ -57,7 +57,7 @@ export function INIT_CONNECTION()
 
 export function SEND_JOIN_REQUEST(usernameValue)
 {
-    const joinRequest = new Message(Util.ServerboundMessageTypes.LOGIN, { username: usernameValue, version: "0.0" });
+    const joinRequest = new Message(Util.ServerboundMessageTypes.HANDSHAKE, { username: usernameValue, version: LATEST_SERVER_VERSION })
     console.log(joinRequest)
     CONNECTION.socket.send(joinRequest.compress());
 }
