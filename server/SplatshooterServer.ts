@@ -81,7 +81,6 @@ class SplatshooterServer
             ws.on("message", (msg) =>
             {
                 const uncompressed = JSON.parse(pako.inflate(msg as any, { to: 'string' }));
-                LOGGER.info("PRE: " + JSON.stringify(uncompressed));
                 if (typeof uncompressed.dataType != "number")
                 {
                     let errorMessage = new Message(ClientboundMessageTypes.ERROR, { code: 3001 });
@@ -106,7 +105,6 @@ class SplatshooterServer
                                 LOGGER.info(`Player ${uncompressed.data.username} joined the game`);
                                 this.playerList.addNewPlayer(ws, new ServerPlayer(this, uncompressed.data.username));
                                 hasPlayer = true;
-                                this.requestsQueue.push(new QueuedMessage(uncompressed, connectedPlayer));
                             }
                             break;
                         default:
@@ -159,21 +157,23 @@ class SplatshooterServer
 
                     this.physicsWorld.step(prevDelay);
 
-                    this.playerList.getPlayerMessageHandlers().forEach((handler, player) =>
+                    this.playerList.getPlayers().forEach((player, i) =>
                     {
+                        const handler = player.connection;
                         if (!player.disconnecting)
                         {
                             handler.tick();
                         }
                     });
 
+                    // Handle the requests queue
                     this.requestsQueue.forEach((data, index) =>
                     {
                         const message = data.message;
                         switch (message.dataType)
                         {
                             case ServerboundMessageTypes.KEEPALIVE:
-                                this.playerList.getPlayerMessageHandlers().get(data.player).onKeepAlive(message as any);
+                                data.player.connection.onKeepAlive(message as any);
                                 break;
                             case ServerboundMessageTypes.CHAT:
                                 this.chat.postMessage(new ChatMessage(data.player, message.data.to, message.data.text));
@@ -183,7 +183,7 @@ class SplatshooterServer
                                 break;
                         }
                     });
-                    this.requestsQueue = [];
+                    this.requestsQueue = []; // Clear it so the console isn't spammed
 
                     lastTickTime = currentTime;
 

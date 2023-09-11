@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 import { ServerPlayer } from "../player/ServerPlayer.ts";
 import { Message } from "./messages/Message.ts";
 import { Util } from "../util/Util.ts";
+import { SplatshooterServer } from "../SplatshooterServer.ts";
 const ClientboundMessageTypes = Util.ClientboundMessageTypes;
 
 
@@ -9,9 +10,9 @@ export { ServerPlayerMessageHandler };
 
 class ServerPlayerMessageHandler
 {
-
+    readonly server: SplatshooterServer;
     readonly player: ServerPlayer;
-    readonly ws: WebSocket;
+    private readonly ws: WebSocket;
 
     keepAlivePending: boolean;
     keepAliveTime: number;
@@ -22,12 +23,16 @@ class ServerPlayerMessageHandler
     /**
     * The server's handler for a client's handshake request.
     * @constructor
+    * @param {SplatshooterServer} server
     * @param {ServerPlayer} player 
     * @param {WebSocket} connection 
     */
-    constructor(player: ServerPlayer, connection: WebSocket)
+    constructor(server: SplatshooterServer, player: ServerPlayer, connection: WebSocket)
     {
+        this.server = server;
         this.player = player;
+        player.connection = this;
+        this.keepAliveTime = Date.now();
         this.ws = connection;
     }
 
@@ -44,19 +49,10 @@ class ServerPlayerMessageHandler
                 this.keepAlivePending = true;
                 this.keepAliveTime = i;
                 this.keepAliveChallenge = i;
-                const keepAlive = new Message(ClientboundMessageTypes.KEEPALIVE, { id: this.keepAliveChallenge });
-                this.ws.send(keepAlive.compress());
+                const keepAliveMessage = new Message(ClientboundMessageTypes.KEEPALIVE, { id: this.keepAliveChallenge });
+                this.send(keepAliveMessage);
             }
         }
-    }
-
-    /**
-     * Handles a player joining a game once the handshake is complete and the login is processed
-     * @param playerJoinData
-     */
-    onPlayerJoin (playerJoinData: object)
-    {
-
     }
 
     onKeepAlive (message: { id: number; })
@@ -76,14 +72,19 @@ class ServerPlayerMessageHandler
     onChatMessage (from: ServerPlayer, text: string)
     {
         const chat = new Message(ClientboundMessageTypes.CHAT, { from, text });
-        this.ws.send(chat.compress());
+        this.send(chat);
+    }
+
+    send (data: Message)
+    {
+        this.ws.send(data.compress());
     }
 
     disconnect (disconnectText: string)
     {
-        const disconnect = new Message(ClientboundMessageTypes.DISCONNECT, { text: disconnectText });
+        const disconnectMessage = new Message(ClientboundMessageTypes.DISCONNECT, { text: disconnectText });
         this.player.disconnecting = true;
-        this.ws.send(disconnect.compress());
+        this.send(disconnectMessage);
         this.ws.close(3000, disconnectText);
     }
 }

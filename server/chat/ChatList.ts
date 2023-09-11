@@ -28,15 +28,13 @@ class ChatList
         const playerListPlayer = this.server.playerList.getPlayers().find((player) => player == chatMessage.sendTo);
         if (playerListPlayer != undefined)
         {
-            const handler = this.server.playerList.getPlayerMessageHandlers().get(playerListPlayer);
-            handler.onChatMessage(chatMessage.from, chatMessage.text);
+            playerListPlayer.connection.onChatMessage(chatMessage.from, chatMessage.text);
         }
         else
         {
             this.server.playerList.getPlayers().forEach((player) =>
             {
-                const handler = this.server.playerList.getPlayerMessageHandlers().get(player);
-                handler.onChatMessage(chatMessage.from, chatMessage.text);
+                playerListPlayer.connection.onChatMessage(chatMessage.from, chatMessage.text);
             });
         }
     }

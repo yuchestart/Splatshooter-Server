@@ -1,4 +1,4 @@
-export { Util }
+export { Util };
 
 class Util
 {
@@ -15,7 +15,11 @@ class Util
         HANDSHAKE: 0,
         STATUS: 1,
         KEEPALIVE: 2,
-        CHAT: 3
+        INFO: 3,
+        LOGIN: 4,
+        NEWPLAYER: 5,
+        CHAT: 6,
+        HEALTHUPDATE: 7
     };
 
 }

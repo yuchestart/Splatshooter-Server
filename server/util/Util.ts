@@ -1,3 +1,5 @@
+import { PlayerList } from "../player/PlayerList.ts";
+import { ServerPlayer } from "../player/ServerPlayer.ts";
 import { Logger } from "./Logger.ts";
 
 export { Util };
@@ -32,6 +34,10 @@ class Util
         HANDSHAKE: 0,
         STATUS: 1,
         KEEPALIVE: 2,
-        CHAT: 3
+        INFO: 3,
+        LOGIN: 4,
+        NEWPLAYER: 5,
+        CHAT: 6,
+        HEALTHUPDATE: 7
     };
 }

@@ -3,6 +3,7 @@ import * as uuid from 'uuid';
 import * as cannon from "cannon";
 import { WebSocket } from "ws";
 import { SplatshooterServer } from "../SplatshooterServer.ts";
+import { ServerPlayerMessageHandler } from "../network/ServerPlayerMessageHandler.ts";
 
 export { ServerPlayer };
 
@@ -10,12 +11,13 @@ class ServerPlayer
 {
     readonly server: SplatshooterServer;
     readonly username: string;
-    position: Vector3d;
-    rotation: Vector3d;
-    latency: number = 0;
+    private position: Vector3d;
+    private rotation: Vector3d;
+    public latency: number = 0;
     readonly uuid: string;
     team: number;
-    body: cannon.Body;
+    private body: cannon.Body;
+    public connection: ServerPlayerMessageHandler;
     disconnecting: boolean = false;
 
     constructor(server: SplatshooterServer, username: string)
@@ -46,6 +48,18 @@ class ServerPlayer
     getZ ()
     {
         return this.position.z;
+    }
+    getPosition ()
+    {
+        return this.position;
+    }
+    getRotation ()
+    {
+        return this.rotation;
+    }
+    getBody ()
+    {
+        return this.body;
     }
 
     getUUID ()

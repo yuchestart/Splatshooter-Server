@@ -20,10 +20,10 @@ export const CONNECTION = {
                 this.id = message.data;
                 loadModalHide();
                 break;
-            case 1:
+            case Util.ClientboundMessageTypes.LOGIN:
                 gameMain();
                 break;
-            case 2:
+            case Util.ClientboundMessageTypes.KEEPALIVE:
                 const keepAlive = new Message(Util.ServerboundMessageTypes.KEEPALIVE, { id: uncompressed.data.id });
                 this.socket.send(keepAlive.compress());
                 break;
@@ -57,7 +57,6 @@ export function INIT_CONNECTION()
 
 export function SEND_JOIN_REQUEST(usernameValue)
 {
-    const joinRequest = new Message(Util.ServerboundMessageTypes.HANDSHAKE, { username: usernameValue, version: LATEST_SERVER_VERSION })
-    console.log(joinRequest)
+    const joinRequest = new Message(Util.ServerboundMessageTypes.LOGIN, { username: usernameValue, version: LATEST_SERVER_VERSION });
     CONNECTION.socket.send(joinRequest.compress());
 }
