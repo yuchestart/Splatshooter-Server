@@ -4,6 +4,8 @@ import { SplatshooterServer } from "../SplatshooterServer.ts";
 import { ServerPlayerMessageHandler } from "../network/ServerPlayerMessageHandler.ts";
 import { Message } from "../network/messages/Message.ts";
 import { Util } from "../util/Util.ts";
+import { ChatMessage } from "../chat/ChatMessage.ts";
+import { LOGGER } from "../../index.ts";
 
 export { PlayerList };
 
@@ -28,31 +30,62 @@ class PlayerList
 
         const team = this.getBalancedTeam();
 
+        player.team = team;
+
         handler.send(new Message(Util.ClientboundMessageTypes.LOGIN, {
-            player: player,
+            name: player.getName(),
+            position: player.getPosition(),
+            rotation: player.getRotation(),
+            velocity: player.getBody().velocity,
             team: team
         }));
 
-        this.getPlayers().forEach((splayer, index) =>
+        this.getPlayers().filter((filterPlayer) => filterPlayer != player).forEach((splayer, index) =>
         {
             handler.send(new Message(Util.ClientboundMessageTypes.NEWPLAYER, {
                 name: splayer.getName(),
+                uuid: splayer.getUUID(),
                 position: splayer.getPosition(),
                 rotation: splayer.getRotation(),
-                velocity: splayer.getBody().velocity
+                velocity: splayer.getBody().velocity,
+                team: splayer.getTeam()
             }));
             splayer.connection.send(new Message(Util.ClientboundMessageTypes.NEWPLAYER, {
                 name: player.getName(),
+                uuid: player.getUUID(),
                 position: player.getPosition(),
                 rotation: player.getRotation(),
-                velocity: player.getBody().velocity
+                velocity: player.getBody().velocity,
+                team: player.getTeam()
             }));
         });
+        this.server.chat.postMessage(new ChatMessage(null, null, `${player.getName()} joined the game`));
+    }
+
+    public removePlayer (player: ServerPlayer): void
+    {
+        LOGGER.info(`Player ${player.getName()} left the game`);
+        this.server.chat.postMessage(new ChatMessage(null, null, `Player ${player.getName()} left the game`));
+        this.getPlayers().filter((filterPlayer) => filterPlayer != player).forEach((player, index) =>
+        {
+            player.connection.send(new Message(Util.ClientboundMessageTypes.REMOVEPLAYER, { uuid: player.getUUID() }));
+        });
+        var index = this.getPlayers().indexOf(player);
+        if (index !== -1)
+        {
+            this.getPlayers().splice(index, 1);
+        }
+        this.server.chat.postMessage(new ChatMessage(null, null, `${player.getName()} left the game`));
     }
 
     public getPlayers (): ServerPlayer[]
     {
         return this.players;
+    }
+
+    public getPlayerByUUID (uuid: string): ServerPlayer
+    {
+        return this.playersByUUID.get(uuid);
     }
 
     public getMax (): number

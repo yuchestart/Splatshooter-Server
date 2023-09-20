@@ -37,7 +37,8 @@ class Util
         INFO: 3,
         LOGIN: 4,
         NEWPLAYER: 5,
-        CHAT: 6,
-        HEALTHUPDATE: 7
+        REMOVEPLAYER: 6,
+        CHAT: 7,
+        HEALTHUPDATE: 8
     };
 }

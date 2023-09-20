@@ -1,6 +1,6 @@
 import { Vector3d } from "../util/Vector3d.ts";
 import * as uuid from 'uuid';
-import * as cannon from "cannon";
+import CANNON from "cannon";
 import { WebSocket } from "ws";
 import { SplatshooterServer } from "../SplatshooterServer.ts";
 import { ServerPlayerMessageHandler } from "../network/ServerPlayerMessageHandler.ts";
@@ -16,7 +16,7 @@ class ServerPlayer
     public latency: number = 0;
     readonly uuid: string;
     team: number;
-    private body: cannon.Body;
+    private body: CANNON.Body;
     public connection: ServerPlayerMessageHandler;
     disconnecting: boolean = false;
 
@@ -24,6 +24,7 @@ class ServerPlayer
     {
         this.server = server;
         this.username = username;
+        this.body = new CANNON.Body({ fixedRotation: true });
         this.uuid = uuid.v4();
     }
 

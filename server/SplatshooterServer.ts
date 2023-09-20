@@ -1,16 +1,9 @@
-import { Worker } from "worker_threads";
-import os from "os";
 import config from "../splatshooter_config.json" assert {type: "json"};
-import https from "https";
-import http from "http";
-import fs from "fs";
 import CANNON from "cannon";
 import pako from "pako";
 import WebSocket, { WebSocketServer } from "ws";
 import { Message } from "./network/messages/Message.ts";
 import { ServerHandshakeHandler } from "./network/ServerHandshakeHandler.ts";
-import { APIHandler } from "./api/APIHandler.ts";
-import { ServerPlayerMessageHandler } from "./network/ServerPlayerMessageHandler.ts";
 import { ServerPlayer } from "./player/ServerPlayer.ts";
 import { Util } from "./util/Util.ts";
 const ClientboundMessageTypes = Util.ClientboundMessageTypes;
@@ -47,7 +40,7 @@ class SplatshooterServer
         this.socketServer = socketServer;
     }
 
-    canJoinServer (data, ws: WebSocket)
+    canJoinServer (data: { version: string; }, ws: WebSocket)
     {
         if (data.version != config.server.version)
         {
@@ -75,6 +68,7 @@ class SplatshooterServer
         {
             let connectedPlayer: ServerPlayer = null;
             let hasPlayer = false;
+            let authToken: string = null;
 
             console.log("connected");
 
@@ -88,44 +82,49 @@ class SplatshooterServer
                     return;
                 }
 
-                if (!hasPlayer)
+                if (this.validateAuthToken(uncompressed.authToken, authToken, uncompressed.dataType))
                 {
-                    switch (uncompressed.dataType)
-                    {
-                        case ServerboundMessageTypes.ERROR:
-                            LOGGER.warn("Caught error message from client: " + uncompressed.data);
-                            break;
-                        case ServerboundMessageTypes.HANDSHAKE:
-                            this.handshakeHandler.onHandshake(uncompressed.data, ws);
-                            break;
-                        case ServerboundMessageTypes.LOGIN:
 
-                            if (this.canJoinServer(uncompressed.data, ws))
-                            {
-                                LOGGER.info(`Player ${uncompressed.data.username} joined the game`);
-                                this.playerList.addNewPlayer(ws, new ServerPlayer(this, uncompressed.data.username));
-                                hasPlayer = true;
-                            }
-                            break;
-                        default:
-                            LOGGER.warn("Unknown data type while player has not been created! Sending to request queue, but may cause issues. Data Type is " + uncompressed.dataType);
-                            this.requestsQueue.push(new QueuedMessage(uncompressed, connectedPlayer));
-                            break;
+                    if (!hasPlayer)
+                    {
+                        switch (uncompressed.dataType)
+                        {
+                            case ServerboundMessageTypes.ERROR:
+                                LOGGER.warn("Caught error message from client: " + uncompressed.data);
+                                break;
+                            case ServerboundMessageTypes.HANDSHAKE:
+                                authToken = this.handshakeHandler.onHandshake(uncompressed.data, ws);
+                                break;
+                            case ServerboundMessageTypes.LOGIN:
+
+                                if (this.canJoinServer(uncompressed.data, ws))
+                                {
+                                    LOGGER.info(`Player ${uncompressed.data.username} joined the game`);
+                                    connectedPlayer = new ServerPlayer(this, uncompressed.data.username);
+                                    this.playerList.addNewPlayer(ws, connectedPlayer);
+                                    hasPlayer = true;
+                                }
+                                break;
+                            default:
+                                LOGGER.warn("Unknown data type while player has not been created! Sending to request queue, but may cause issues. Data Type is " + uncompressed.dataType);
+                                this.requestsQueue.push(new QueuedMessage(uncompressed, connectedPlayer));
+                                break;
+                        }
                     }
-                }
-                else
-                {
-                    this.requestsQueue.push(new QueuedMessage(uncompressed, connectedPlayer));
+                    else
+                    {
+                        this.requestsQueue.push(new QueuedMessage(uncompressed, connectedPlayer));
+                    }
                 }
             });
             ws.on("close", (code, reason) =>
             {
                 if (connectedPlayer)
                 {
-                    this.chat.postMessage(new ChatMessage(null, null, connectedPlayer.getName()));
-                    connectedPlayer = undefined;
-                    hasPlayer = false;
+                    this.playerList.removePlayer(connectedPlayer);
                 }
+                connectedPlayer = undefined;
+                hasPlayer = false;
             });
         });
 
@@ -173,10 +172,12 @@ class SplatshooterServer
                         switch (message.dataType)
                         {
                             case ServerboundMessageTypes.KEEPALIVE:
-                                data.player.connection.onKeepAlive(message as any);
+                                data.player.connection.onKeepAlive(message.data);
+                                // Just a debug to test chat rendering until I have a chat box implemented
+                                data.player.connection.send(new Message(Util.ClientboundMessageTypes.CHAT, { from: null, text: "rendering test" }));
                                 break;
                             case ServerboundMessageTypes.CHAT:
-                                this.chat.postMessage(new ChatMessage(data.player, message.data.to, message.data.text));
+                                this.chat.postMessage(new ChatMessage(data.player.getUUID(), message.data.to, message.data.text));
                                 break;
                             default:
                                 LOGGER.warn("Unknown message type " + message.dataType + " recieved!");
@@ -210,11 +211,11 @@ class SplatshooterServer
         this.running = false;
     }
 
-    isCompressed (data: string | ArrayBuffer | Buffer[], intended: boolean)
+    isCompressed (data: any, intended: boolean)
     {
         try
         {
-            pako.inflate(data as Buffer);
+            pako.inflate(data);
             return true;
         } catch (error)
         {
@@ -229,5 +230,24 @@ class SplatshooterServer
     getStatus ()
     {
         return { playersOnline: this.playerList.getPlayers().length, maxPlayers: this.playerList.getMax() };
+    }
+
+    private validateAuthToken (sent: string, known: string, dataType: number)
+    {
+        if (dataType == ServerboundMessageTypes.HANDSHAKE)
+        {
+            // You shouldn't need a token for a handshake, as that is when it's given.
+            // Also, server status.
+            return true;
+        }
+        else if (sent === known)
+        {
+            return true;
+        } else
+        {
+            LOGGER.warn(`User's authtoken did not match! User's token was ${sent}, while I think it's ${known}`);
+            return false;
+        }
+
     }
 }

@@ -15,6 +15,7 @@ class ChatList
     constructor(server: SplatshooterServer)
     {
         this.server = server;
+        this.serverChat = [];
     }
 
     /**
@@ -24,8 +25,10 @@ class ChatList
     public postMessage (chatMessage: ChatMessage)
     {
         this.serverChat.unshift(chatMessage);
-        LOGGER.info(`Sending chat message to ${chatMessage.sendTo.getName()} from ${chatMessage.from.getName()}`);
-        const playerListPlayer = this.server.playerList.getPlayers().find((player) => player == chatMessage.sendTo);
+        const to = this.server.playerList.getPlayerByUUID(chatMessage.sendTo);
+        const from = this.server.playerList.getPlayerByUUID(chatMessage.from);
+        LOGGER.info(`Sending chat message "${chatMessage.text}" to ${to ? to.getName() : "everyone"} from ${from ? from.getName() : "the server"}`);
+        const playerListPlayer = this.server.playerList.getPlayers().find((player) => player == to);
         if (playerListPlayer != undefined)
         {
             playerListPlayer.connection.onChatMessage(chatMessage.from, chatMessage.text);
@@ -34,7 +37,7 @@ class ChatList
         {
             this.server.playerList.getPlayers().forEach((player) =>
             {
-                playerListPlayer.connection.onChatMessage(chatMessage.from, chatMessage.text);
+                player.connection.onChatMessage(chatMessage.from, chatMessage.text);
             });
         }
     }

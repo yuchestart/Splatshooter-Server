@@ -1,0 +1,5 @@
+{
+    "error.toomanyplayers": "Too many players! Max 24, you have %s",
+    "disconnnect.badversion": "Mismatched version! I'm on %s.",
+    "disconnect.serverfull": "Server is full!"
+}

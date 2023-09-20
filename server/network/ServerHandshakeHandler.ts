@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import pako from "pako";
 import { Message } from "./messages/Message.ts";
 import WebSocket from "ws";
@@ -22,7 +23,7 @@ class ServerHandshakeHandler
         this.server = server;
     };
 
-    onHandshake (handshakeData: any, socket: WebSocket)
+    onHandshake (handshakeData: any, socket: WebSocket): string
     {
         switch (handshakeData.intent)
         {
@@ -30,12 +31,14 @@ class ServerHandshakeHandler
                 let status = this.server.getStatus();
                 let statusMessage = new Message(ClientboundMessageTypes.STATUS, { playersOnline: status.playersOnline, maxPlayers: status.maxPlayers });
                 socket.send(statusMessage.compress());
-                break;
+                socket.close(1004, "Status finished");
+                return null;
             case "login":
-                let handshake = new Message(ClientboundMessageTypes.HANDSHAKE, { intent: 'confirm' });
+                let token = crypto.randomBytes(10).toString();
+                let handshake = new Message(ClientboundMessageTypes.HANDSHAKE, { intent: 'confirm', authToken: token });
                 let compressed = pako.deflate(JSON.stringify(handshake));
                 socket.send(compressed);
-                break;
+                return token;
             default:
                 LOGGER.warn("Invalid intent " + handshakeData.intent + " recieved!");
                 break;

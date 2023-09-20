@@ -6,12 +6,12 @@
     left:0px;
     margin: 0px;
 }
-#render3d,#render2d{
-    width:inherit;
-    height:inherit;
-    position:inherit;
-    top:inherit;
-    left:inherit;
+.overlay2d {
+    z-index: 9999;
+    position: absolute;
+}
+.overlay3d {
+    position: absolute;
 }
 .hidden {
     position: absolute;
