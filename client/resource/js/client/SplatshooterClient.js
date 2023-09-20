@@ -1,8 +1,8 @@
-import { ChatHandler } from "../chat/ChatHandler";
-import Message from "../network/Message";
-import { ClientPlayerMessageHandler } from "../network/socket";
-import { Renderer } from "../render/Renderer";
-import { Util } from "../util/Util";
+import { ChatHandler } from "../chat/ChatHandler.js";
+import Message from "../network/Message.js";
+import { ClientPlayerMessageHandler } from "../network/socket.js";
+import { Renderer } from "../render/Renderer.js";
+import { Util } from "../util/Util.js";
 
 class SplatshooterClient
 {

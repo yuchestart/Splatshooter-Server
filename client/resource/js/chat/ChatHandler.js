@@ -1,4 +1,4 @@
-import { SplatshooterClient } from "../client/SplatshooterClient";
+import { SplatshooterClient } from "../client/SplatshooterClient.js";
 
 class ChatHandler
 {
