@@ -1,11 +1,24 @@
 import * as THREE from 'three';
+import { SplatshooterClient } from '../client/SplatshooterClient.js';
 
 class Renderer
 {
+
+    /**
+     * The client.
+     * @param {SplatshooterClient}
+     */
+    client;
+
+    /**
+     * Creates a new client renderer.
+     * @param {SplatshooterClient} client
+     */
     constructor(client)
     {
-
         this.client = client;
+
+        this.client.logger.info("Initializing renderer...");
 
         this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10);
         this.camera.position.z = 1;
@@ -38,6 +51,7 @@ class Renderer
             this.canvas2D.height = window.innerHeight;
         });
 
+        this.client.logger.info("Renderer intialization complete!");
     }
 
     render3D()

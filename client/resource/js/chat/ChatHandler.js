@@ -20,6 +20,9 @@ class ChatHandler
     constructor(client, renderer)
     {
         this.client = client;
+
+        this.chatHistory = [];
+
         this.renderer = renderer;
         this.renderer.font = "40px Arial";
         this.renderer.fillStyle = "white";
@@ -27,7 +30,7 @@ class ChatHandler
 
     addNewChatMessage(message)
     {
-        chatHistory.push(message);
+        this.chatHistory.push(message);
     };
 
     /**

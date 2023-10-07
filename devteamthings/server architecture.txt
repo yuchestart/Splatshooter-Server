@@ -3,4 +3,12 @@ sends notice to server that they joined game
 server creates new server player entity
 player is assigned to team
 server sends notice to all other players to create clientplayerentity
-scoreboard is updated to add player across all clients (scoreboard is tracked on server)
+scoreboard is updated to add player across all clients (scoreboard is NOT tracked on server)
+
+EVERY TICK:
+Physics tick.
+Player inputs are processed.
+Each packet in the queue is processed.
+All players are sent new positions and any changed data.
+    - To minimize amount of data sent, only changed data will be sent to clients. If a client recieves
+      incomplete data, they will simply not update it. For example, animation states.

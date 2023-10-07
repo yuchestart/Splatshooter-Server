@@ -39,7 +39,6 @@ class ServerPlayerMessageHandler
     tick (): void
     {
         let i = performance.now();
-        LOGGER.info(this.player.latency);
         if (i - this.keepAliveTime >= 15000)
         {
             if (this.keepAlivePending)

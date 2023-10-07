@@ -19,6 +19,8 @@ class ChatMessage
     {
         this.from = from;
         this.sendTo = to;
-        this.text = text;
+        // Ensure chat can't be "cleared" by some malicious party via spamming newlines.
+        // TODO: Make sure you can't type newlines in the client chatbox either.
+        this.text = text.replaceAll("\n", "");
     }
 }

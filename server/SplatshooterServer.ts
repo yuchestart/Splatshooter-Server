@@ -1,5 +1,5 @@
 import config from "../splatshooter_config.json" assert {type: "json"};
-import CANNON from "cannon";
+//import CANNON from "cannon-es";
 import pako from "pako";
 import WebSocket, { WebSocketServer } from "ws";
 import { Message } from "./network/messages/Message.ts";
@@ -13,6 +13,8 @@ import { ChatList } from "./chat/ChatList.ts";
 import { ChatMessage } from "./chat/ChatMessage.ts";
 import { QueuedMessage } from "./network/messages/QueuedMessage.ts";
 import { LOGGER } from "../index.ts";
+import { World } from "cannon-es";
+import { version } from "process";
 
 export { SplatshooterServer };
 
@@ -21,12 +23,15 @@ Packet values:
 0: Handshake
 1:
 */
-
+/**
+ * The main server worker.
+ * This creates and manages most things, including ticking all of the server and handling request.
+ */
 class SplatshooterServer
 {
     running = true;
     requestsQueue: QueuedMessage[] = [];
-    physicsWorld: CANNON.World;
+    physicsWorld: World;
     readonly socketServer: WebSocket.WebSocketServer;
     keepAliveTime: number = performance.now();
     keepAlivePending: boolean;
@@ -40,10 +45,11 @@ class SplatshooterServer
         this.socketServer = socketServer;
     }
 
-    canJoinServer (data: { version: string; }, ws: WebSocket)
+    canJoinServer (data: any, ws: WebSocket)
     {
         if (data.version != config.server.version)
         {
+            LOGGER.warn(`User tried to join with mismatched version ${data.version}, while I'm on ${config.server.version}`);
             this.disconnect(ws, "Mismatched Version! I'm on " + config.server.version);
             return false;
         }
@@ -70,8 +76,6 @@ class SplatshooterServer
             let hasPlayer = false;
             let authToken: string = null;
 
-            console.log("connected");
-
             ws.on("message", (msg) =>
             {
                 const uncompressed = JSON.parse(pako.inflate(msg as any, { to: 'string' }));
@@ -82,7 +86,7 @@ class SplatshooterServer
                     return;
                 }
 
-                if (this.validateAuthToken(uncompressed.authToken, authToken, uncompressed.dataType))
+                if (this.validateAuthToken(uncompressed.data.authToken, authToken, uncompressed.dataType))
                 {
 
                     if (!hasPlayer)
@@ -106,8 +110,7 @@ class SplatshooterServer
                                 }
                                 break;
                             default:
-                                LOGGER.warn("Unknown data type while player has not been created! Sending to request queue, but may cause issues. Data Type is " + uncompressed.dataType);
-                                this.requestsQueue.push(new QueuedMessage(uncompressed, connectedPlayer));
+                                LOGGER.warn("Unknown data type while player has not been created! Data Type is " + uncompressed.dataType);
                                 break;
                         }
                     }
@@ -121,14 +124,14 @@ class SplatshooterServer
             {
                 if (connectedPlayer)
                 {
-                    this.playerList.removePlayer(connectedPlayer);
+                    this.playerList.removePlayer(connectedPlayer, reason);
                 }
                 connectedPlayer = undefined;
                 hasPlayer = false;
             });
         });
 
-        this.physicsWorld = new CANNON.World();
+        this.physicsWorld = new World();
 
         return true;
     }
@@ -184,7 +187,7 @@ class SplatshooterServer
                                 break;
                         }
                     });
-                    this.requestsQueue = []; // Clear it so the console isn't spammed
+                    this.requestsQueue = []; // Clear it so messages aren't handled multiple times.
 
                     lastTickTime = currentTime;
 
@@ -200,12 +203,21 @@ class SplatshooterServer
             iteration();
         }
     }
+    /**
+     * Disconnects a websocket. Only used when the player object has not been created.
+     * DO NOT USE THIS IN GAME! ONLY USE THIS BEFORE PLAYER HAS CONNECTED!
+     * @param ws The websocket to disconnect.
+     * @param disconnectText The reason of disconnecting.
+     */
     disconnect (ws: WebSocket, disconnectText: string)
     {
         const disconnect = new Message(ClientboundMessageTypes.DISCONNECT, { text: disconnectText });
         ws.send(disconnect.compress());
         ws.close(3000, disconnectText);
     }
+    /**
+     * Stops the server. Not much to it.
+     */
     stop ()
     {
         this.running = false;

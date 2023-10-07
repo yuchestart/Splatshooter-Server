@@ -6,3 +6,4 @@ MESSAGES SENT BETWEEN SPLATSHOOTER AND THE CLIENT ARE IN THIS FORMAT:
 }
 With the new WebSocket code, you can access websockets from anywhere.
 This means we can make Splatshooter unblockable.
+(old, outdated, and untrue)

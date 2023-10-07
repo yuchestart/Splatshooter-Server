@@ -1,22 +1,25 @@
-import { Vector3d } from "../util/Vector3d.ts";
 import * as uuid from 'uuid';
-import CANNON from "cannon";
+import { Body, Quaternion, Vec3 } from "cannon-es";
 import { WebSocket } from "ws";
 import { SplatshooterServer } from "../SplatshooterServer.ts";
 import { ServerPlayerMessageHandler } from "../network/ServerPlayerMessageHandler.ts";
 
 export { ServerPlayer };
 
+/**
+ * The player object for the game most non-physics player calculations are managed here.
+ * Things such as position are handled by the physics engine.
+ */
 class ServerPlayer
 {
     readonly server: SplatshooterServer;
     readonly username: string;
-    private position: Vector3d;
-    private rotation: Vector3d;
+    private position: Vec3;
+    private rotation: Vec3;
     public latency: number = 0;
     readonly uuid: string;
     team: number;
-    private body: CANNON.Body;
+    private body: Body;
     public connection: ServerPlayerMessageHandler;
     disconnecting: boolean = false;
 
@@ -24,7 +27,7 @@ class ServerPlayer
     {
         this.server = server;
         this.username = username;
-        this.body = new CANNON.Body({ fixedRotation: true });
+        this.body = new Body({ fixedRotation: true });
         this.uuid = uuid.v4();
     }
 
@@ -40,24 +43,37 @@ class ServerPlayer
 
     getX ()
     {
-        return this.position.x;
+        return this.body.position.x;
     }
     getY ()
     {
-        return this.position.y;
+        return this.body.position.y;
     }
     getZ ()
     {
-        return this.position.z;
+        return this.body.position.z;
     }
     getPosition ()
     {
-        return this.position;
+        return this.body.position;
     }
-    getRotation ()
+    /**
+     * Returns the rotation of the player's body as a Euler angle. Please note that it is not actually a vector, `Vec3` is just a simple method of storing three numbers, so it is being used here.
+     * @returns A `Vec3` containing the rotation.
+     */
+    getRotationEuler (): Vec3
     {
-        return this.rotation;
+        let QRot: Quaternion = this.body.quaternion;
+        QRot.toEuler(this.getPosition());
+        return new Vec3(QRot.x, QRot.y, QRot.z);
     }
+
+    getRotationQuaternion (): Quaternion
+    {
+        return this.body.quaternion;
+    }
+
+
     getBody ()
     {
         return this.body;

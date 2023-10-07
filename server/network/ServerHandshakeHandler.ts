@@ -34,7 +34,7 @@ class ServerHandshakeHandler
                 socket.close(1004, "Status finished");
                 return null;
             case "login":
-                let token = crypto.randomBytes(10).toString();
+                let token = Util.getAuthToken();
                 let handshake = new Message(ClientboundMessageTypes.HANDSHAKE, { intent: 'confirm', authToken: token });
                 let compressed = pako.deflate(JSON.stringify(handshake));
                 socket.send(compressed);
