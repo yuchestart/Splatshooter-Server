@@ -78,8 +78,7 @@ class PlayerList
      */
     public removePlayer (player: ServerPlayer, reason: Buffer): void
     {
-        LOGGER.info(`Player ${player.getName()} left the game (${reason.toString() ? reason.toString() : "Client Disconnect"})`);
-        this.server.chat.postMessage(new ChatMessage(null, null, `Player ${player.getName()} left the game (${reason.toString() ? reason.toString() : "Client Disconnect"})`));
+        LOGGER.info(`${player.getName()} left the game (${reason.toString() ? reason.toString() : "Client Disconnect"})`);
         this.getPlayers().filter((filterPlayer) => filterPlayer != player).forEach((player, index) =>
         {
             player.connection.send(new Message(Util.ClientboundMessageTypes.REMOVEPLAYER, { uuid: player.getUUID() }));
@@ -89,6 +88,7 @@ class PlayerList
         {
             this.getPlayers().splice(index, 1);
         }
+        this.server.chat.postMessage(new ChatMessage(null, null, `${player.getName()} left the game (${reason.toString() ? reason.toString() : "Client Disconnect"})`));
     }
 
     /**
