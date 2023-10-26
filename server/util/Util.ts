@@ -3,7 +3,7 @@ import { ServerPlayer } from "../player/ServerPlayer.ts";
 import { Logger } from "./Logger.ts";
 import crypto from 'crypto';
 
-export { Util };
+export { Util, NetworkTypes };
 
 class Util
 {
@@ -34,15 +34,18 @@ class Util
         // Return the string truncated to the desired length
         return string.slice(0, length);
     }
+}
 
-    public static readonly ServerboundMessageTypes = {
+class NetworkTypes
+{
+    static ServerboundMessageTypes = {
         ERROR: -1,
         HANDSHAKE: 0,
         LOGIN: 1,
         KEEPALIVE: 2,
         CHAT: 3
     };
-    public static readonly ClientboundMessageTypes = {
+    static ClientboundMessageTypes = {
         DISCONNECT: -2,
         ERROR: -1,
         HANDSHAKE: 0,

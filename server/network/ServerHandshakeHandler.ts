@@ -3,9 +3,8 @@ import pako from "pako";
 import { Message } from "./messages/Message.ts";
 import WebSocket from "ws";
 import { SplatshooterServer } from "../SplatshooterServer.ts";
-import { Util } from "../util/Util.ts";
+import { Util, NetworkTypes } from "../util/Util.ts";
 import { LOGGER } from "../../index.ts";
-const ClientboundMessageTypes = Util.ClientboundMessageTypes;
 
 export { ServerHandshakeHandler };
 
@@ -29,13 +28,13 @@ class ServerHandshakeHandler
         {
             case "status":
                 let status = this.server.getStatus();
-                let statusMessage = new Message(ClientboundMessageTypes.STATUS, { playersOnline: status.playersOnline, maxPlayers: status.maxPlayers });
+                let statusMessage = new Message(NetworkTypes.ClientboundMessageTypes.STATUS, { playersOnline: status.playersOnline, maxPlayers: status.maxPlayers });
                 socket.send(statusMessage.compress());
                 socket.close(1004, "Status finished");
                 return null;
             case "login":
                 let token = Util.getAuthToken();
-                let handshake = new Message(ClientboundMessageTypes.HANDSHAKE, { intent: 'confirm', authToken: token });
+                let handshake = new Message(NetworkTypes.ClientboundMessageTypes.HANDSHAKE, { intent: 'confirm', authToken: token });
                 let compressed = pako.deflate(JSON.stringify(handshake));
                 socket.send(compressed);
                 return token;

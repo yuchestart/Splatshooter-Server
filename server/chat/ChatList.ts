@@ -40,6 +40,8 @@ class ChatList
                 player.connection.onChatMessage(chatMessage.from, chatMessage.text);
             });
         }
+        // limit the length of the server chat, in case a malicious party wants to use up memory by spamming chat messages.
+        this.serverChat.length = Math.min(this.serverChat.length, 50);
     }
 
 }

@@ -1,9 +1,14 @@
+import { NetworkTypes } from "../../../shared/CommonTypes.js";
 import { SplatshooterClient } from "./client/SplatshooterClient.js";
+import Message from "./network/Message.js";
 
 let CONFIG;
 
 let adsAreEnabled = true;
 
+/**
+ * @type {SplatshooterClient}
+ */
 export let CLIENT;
 
 export const LATEST_SERVER_VERSION = "0.0";
@@ -24,3 +29,10 @@ function main()
   CLIENT = new SplatshooterClient(CONFIG);
 }
 window.onload = main;
+
+sendChatMessage = function (textToSend)
+{
+  CLIENT.messageHandler.send(
+    new Message(NetworkTypes.ServerboundMessageTypes.CHAT, { to: null, text: textToSend })
+  );
+};

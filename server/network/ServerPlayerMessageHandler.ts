@@ -1,10 +1,9 @@
 import { WebSocket } from "ws";
 import { ServerPlayer } from "../player/ServerPlayer.ts";
 import { Message } from "./messages/Message.ts";
-import { Util } from "../util/Util.ts";
+import { NetworkTypes } from "../util/Util.ts";
 import { SplatshooterServer } from "../SplatshooterServer.ts";
 import { LOGGER } from "../../index.ts";
-const ClientboundMessageTypes = Util.ClientboundMessageTypes;
 
 
 export { ServerPlayerMessageHandler };
@@ -49,7 +48,7 @@ class ServerPlayerMessageHandler
                 this.keepAlivePending = true;
                 this.keepAliveTime = i;
                 this.keepAliveChallenge = Math.round(i);
-                const keepAliveMessage = new Message(ClientboundMessageTypes.KEEPALIVE, { id: this.keepAliveChallenge });
+                const keepAliveMessage = new Message(NetworkTypes.ClientboundMessageTypes.KEEPALIVE, { id: this.keepAliveChallenge });
                 this.send(keepAliveMessage);
             }
         }
@@ -71,7 +70,7 @@ class ServerPlayerMessageHandler
 
     onChatMessage (from: string, text: string): void
     {
-        const chat = new Message(ClientboundMessageTypes.CHAT, { from, text });
+        const chat = new Message(NetworkTypes.ClientboundMessageTypes.CHAT, { from, text });
         this.send(chat);
     }
 
@@ -82,7 +81,7 @@ class ServerPlayerMessageHandler
 
     disconnect (disconnectText: string): void
     {
-        const disconnectMessage = new Message(ClientboundMessageTypes.DISCONNECT, { text: disconnectText });
+        const disconnectMessage = new Message(NetworkTypes.ClientboundMessageTypes.DISCONNECT, { text: disconnectText });
         this.player.disconnecting = true;
         this.send(disconnectMessage);
         this.ws.close(3000, disconnectText);

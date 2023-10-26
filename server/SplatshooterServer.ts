@@ -1,20 +1,17 @@
 import config from "../splatshooter_config.json" assert {type: "json"};
 //import CANNON from "cannon-es";
-import pako from "pako";
+import pako, { Data } from "pako";
 import WebSocket, { WebSocketServer } from "ws";
 import { Message } from "./network/messages/Message.ts";
 import { ServerHandshakeHandler } from "./network/ServerHandshakeHandler.ts";
 import { ServerPlayer } from "./player/ServerPlayer.ts";
-import { Util } from "./util/Util.ts";
-const ClientboundMessageTypes = Util.ClientboundMessageTypes;
-const ServerboundMessageTypes = Util.ServerboundMessageTypes;
+import { NetworkTypes } from "./util/Util.ts";
 import { PlayerList } from "./player/PlayerList.ts";
 import { ChatList } from "./chat/ChatList.ts";
 import { ChatMessage } from "./chat/ChatMessage.ts";
 import { QueuedMessage } from "./network/messages/QueuedMessage.ts";
 import { LOGGER } from "../index.ts";
 import { World } from "cannon-es";
-import { version } from "process";
 
 export { SplatshooterServer };
 
@@ -78,28 +75,27 @@ class SplatshooterServer
 
             ws.on("message", (msg) =>
             {
-                const uncompressed = JSON.parse(pako.inflate(msg as any, { to: 'string' }));
-                if (typeof uncompressed.dataType != "number")
+                const uncompressed = JSON.parse(pako.inflate(msg as Data, { to: 'string' }));
+                if (typeof uncompressed.dataType !== "number")
                 {
-                    let errorMessage = new Message(ClientboundMessageTypes.ERROR, { code: 3001 });
+                    let errorMessage = new Message(NetworkTypes.ClientboundMessageTypes.ERROR, { code: 3001 });
                     ws.send(errorMessage.compress());
                     return;
                 }
 
                 if (this.validateAuthToken(uncompressed.data.authToken, authToken, uncompressed.dataType))
                 {
-
                     if (!hasPlayer)
                     {
                         switch (uncompressed.dataType)
                         {
-                            case ServerboundMessageTypes.ERROR:
+                            case NetworkTypes.ServerboundMessageTypes.ERROR:
                                 LOGGER.warn("Caught error message from client: " + uncompressed.data);
                                 break;
-                            case ServerboundMessageTypes.HANDSHAKE:
+                            case NetworkTypes.ServerboundMessageTypes.HANDSHAKE:
                                 authToken = this.handshakeHandler.onHandshake(uncompressed.data, ws);
                                 break;
-                            case ServerboundMessageTypes.LOGIN:
+                            case NetworkTypes.ServerboundMessageTypes.LOGIN:
 
                                 if (this.canJoinServer(uncompressed.data, ws))
                                 {
@@ -174,12 +170,12 @@ class SplatshooterServer
                         const message = data.message;
                         switch (message.dataType)
                         {
-                            case ServerboundMessageTypes.KEEPALIVE:
+                            case NetworkTypes.ServerboundMessageTypes.KEEPALIVE:
                                 data.player.connection.onKeepAlive(message.data);
                                 // Just a debug to test chat rendering until I have a chat box implemented
-                                data.player.connection.send(new Message(Util.ClientboundMessageTypes.CHAT, { from: null, text: "rendering test" }));
+                                data.player.connection.send(new Message(NetworkTypes.ClientboundMessageTypes.CHAT, { from: null, text: "rendering test" }));
                                 break;
-                            case ServerboundMessageTypes.CHAT:
+                            case NetworkTypes.ServerboundMessageTypes.CHAT:
                                 this.chat.postMessage(new ChatMessage(data.player.getUUID(), message.data.to, message.data.text));
                                 break;
                             default:
@@ -211,7 +207,7 @@ class SplatshooterServer
      */
     disconnect (ws: WebSocket, disconnectText: string)
     {
-        const disconnect = new Message(ClientboundMessageTypes.DISCONNECT, { text: disconnectText });
+        const disconnect = new Message(NetworkTypes.ClientboundMessageTypes.DISCONNECT, { text: disconnectText });
         ws.send(disconnect.compress());
         ws.close(3000, disconnectText);
     }
@@ -246,7 +242,7 @@ class SplatshooterServer
 
     private validateAuthToken (sent: string, known: string, dataType: number)
     {
-        if (dataType == ServerboundMessageTypes.HANDSHAKE)
+        if (dataType == NetworkTypes.ServerboundMessageTypes.HANDSHAKE)
         {
             // You shouldn't need a token for a handshake, as that is when it's given.
             // Also, server status.

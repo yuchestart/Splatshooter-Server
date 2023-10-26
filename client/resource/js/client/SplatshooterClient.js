@@ -11,6 +11,11 @@ class SplatshooterClient
 {
 
     config;
+
+    /**
+     * The game client's network handler, responsible for sending, recieving, and handling network messages.
+     * @type {ClientPlayerMessageHandler}
+     */
     messageHandler;
 
     /**

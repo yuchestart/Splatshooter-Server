@@ -3,7 +3,7 @@ import { ServerPlayer } from "./ServerPlayer.ts";
 import { SplatshooterServer } from "../SplatshooterServer.ts";
 import { ServerPlayerMessageHandler } from "../network/ServerPlayerMessageHandler.ts";
 import { Message } from "../network/messages/Message.ts";
-import { Util } from "../util/Util.ts";
+import { NetworkTypes } from "../util/Util.ts";
 import { ChatMessage } from "../chat/ChatMessage.ts";
 import { LOGGER } from "../../index.ts";
 
@@ -41,7 +41,7 @@ class PlayerList
 
         player.team = team;
 
-        handler.send(new Message(Util.ClientboundMessageTypes.LOGIN, {
+        handler.send(new Message(NetworkTypes.ClientboundMessageTypes.LOGIN, {
             name: player.getName(),
             position: player.getPosition(),
             rotation: player.getRotationQuaternion(),
@@ -51,7 +51,7 @@ class PlayerList
 
         this.getPlayers().filter((filterPlayer) => filterPlayer != player).forEach((splayer, index) =>
         {
-            handler.send(new Message(Util.ClientboundMessageTypes.NEWPLAYER, {
+            handler.send(new Message(NetworkTypes.ClientboundMessageTypes.NEWPLAYER, {
                 name: splayer.getName(),
                 uuid: splayer.getUUID(),
                 position: splayer.getPosition(),
@@ -59,7 +59,7 @@ class PlayerList
                 velocity: splayer.getBody().velocity,
                 team: splayer.getTeam()
             }));
-            splayer.connection.send(new Message(Util.ClientboundMessageTypes.NEWPLAYER, {
+            splayer.connection.send(new Message(NetworkTypes.ClientboundMessageTypes.NEWPLAYER, {
                 name: player.getName(),
                 uuid: player.getUUID(),
                 position: player.getPosition(),
@@ -81,7 +81,7 @@ class PlayerList
         LOGGER.info(`${player.getName()} left the game (${reason.toString() ? reason.toString() : "Client Disconnect"})`);
         this.getPlayers().filter((filterPlayer) => filterPlayer != player).forEach((player, index) =>
         {
-            player.connection.send(new Message(Util.ClientboundMessageTypes.REMOVEPLAYER, { uuid: player.getUUID() }));
+            player.connection.send(new Message(NetworkTypes.ClientboundMessageTypes.REMOVEPLAYER, { uuid: player.getUUID() }));
         });
         var index = this.getPlayers().indexOf(player);
         if (index !== -1)
