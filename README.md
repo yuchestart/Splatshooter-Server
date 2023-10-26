@@ -1,14 +1,7 @@
 # Splatshooter
 
-My friend [William](./CREDITS.md#mission-control) just wanted to make a game similar to Splatoon 3.
-<hr>
-From the dev team at [REDACTED];
+A demake of Splatoon 3 designed to run in the browser.
 
-This is just a recreation of Splatoon 3 designed to run in the browser so you can play it on almost any device.
+This repository is of the backend of the game, if you are looking for the frontend go [here](https://github.com/yuchestart/Splatshooter-Client).
 
-# Currently
-No, we did not abandon the project. We aren't able to do anything at the moment cuz I'm busy and CATS is not finished yet.
-# Aiden Here
-How are you
-# Leak alert
-Bro some guy called Joe decided to leak our project please help lol
+For credits of this project, go [here](https://github.com/yuchestart/Splatshooter-Server/blob/main/CREDITS.md).

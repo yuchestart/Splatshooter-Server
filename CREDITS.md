@@ -1,30 +1,30 @@
-# [ <img src='./images/back.svg' width='30' height='30'/> ](https://github.com/What-ever-this-is/Splatshooter) Meet our dev team!
+# [ <img src='./images/back.svg' width='30' height='30'/> ](https://github.com/What-ever-this-is/Splatshooter) Credits
 
-## "Mission Control"
+## Product Manager
 
 William Halbritter Rodriguez - Chief Executive Officer
 
-## Arts
+## Artists
 
 Aiden Coogan - 3D Modeling
 
 William Halbritter Rodriguez - 3D Modeling
 
-## Code
+## Developers
 
-Che Yu - Head Developer
+Che Yu - Head Developer and Graphics Library Developer
+
+Austin Harderson - Main Backend Developer
 
 Aiden Coogan - Developer
 
-Austin Harderson - Developer
+## QA Testing
 
-## "Test Pilots"
+Irvin Ju - Tester
 
-Irvin Ju - Future Tester
+William Halbritter Rodriguez - Tester
 
-William Halbritter Rodriguez - Future Tester
-
-Jack Galle - Future Tester
+Jack Galle - Tester
 
 ## Music
 
@@ -32,8 +32,6 @@ Irvin Ju - Composer
 
 Che Yu - Composer
 
-William Halbritter Rodriguez - Former Composer
+## Financing
 
-## "Financing and other boring things"
-
-Xue Yu - Manages Azure Subscription (though currently hates Azure and wants to switch to AWS)
+Xue Yu - Manages Hosting Costs
