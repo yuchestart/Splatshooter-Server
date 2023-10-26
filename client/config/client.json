@@ -1,6 +1,0 @@
-{
-    "HOST_ON_LOCAL_SERVER":true,
-    "DEPLOYMENT_URL":"",
-    "LOCAL_URL":"localhost:6479",
-    "CLIENT_TYPE":"DEVELOPMENT" 
-}
