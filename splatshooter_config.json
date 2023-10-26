@@ -1,23 +1,10 @@
 {
-    "server": {
-        "version": "0.0",
-        "host": true,
-        "port": 6479,
-        "use_ssl": false,
-        "ssl": {
-            "certificate": "ssl/yourcerthere",
-            "key": "ssl/yourkeyhere"
-        },
-        "maxthreads": 1
-    },
-    "client": {
-        "version": "0.0",
-        "host": true,
-        "port": 8081,
-        "use_ssl": false,
-        "ssl": {
-            "certificate": "ssl/yourcerthere",
-            "key": "ssl/yourkeyhere"
-        }
+    "version": "0.0",
+    "host": true,
+    "port": 6479,
+    "use_ssl": false,
+    "ssl": {
+        "certificate": "ssl/yourcerthere",
+        "key": "ssl/yourkeyhere"
     }
 }
